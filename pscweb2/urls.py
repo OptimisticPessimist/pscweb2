@@ -23,4 +23,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('prod/', include('production.urls')),
     path('rhsl/', include('rehearsal.urls')),
+    path('scrpt/', include('script.urls')),
 ]

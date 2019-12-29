@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="margin: 0px;">台本一覧</h1>
+<div align="right"><a href="#" class="addlink">新規作成</a></div>
+<table>
+    <tr>
+        <th>題名</th>
+        <th>著者名</th>
+        <th>作成日時</th>
+        <th>変更日時</th>
+        <th>所有者</th>
+    </tr>
+    {% for entry in view.list_entries %}
+    <tr>
+        <td><a href="{% url 'script:scrpt_detail' pk=entry.id %}">{{ entry.title }}</a></td>
+        <td>{{ entry.author }}</td>
+        <td>{{ entry.create_dt|date:"Y m/d H:i" }}</td>
+        <td>{{ entry.modify_dt|date:"Y m/d H:i" }}</td>
+        <td>{{ entry.owner__username }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

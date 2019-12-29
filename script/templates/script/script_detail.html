@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="margin: 0px;">
+<a href="{% url 'script:scrpt_list' %}">◀</a>
+台本の詳細
+</h1>
+
+{% if view.request.user == object.owner %}
+<div align="right"><a href="" class="changelink">編集</a></div>
+{% else %}
+<div>&nbsp;</div>
+{% endif %}
+
+<table>
+    <tr><th>題名</th><td>{{ object.title }}</td></tr>
+    <tr><th>著者名</th><td>{{ object.author }}</td></tr>
+    <tr><th>作成日時</th><td>{{ object.create_dt|date:"Y m/d H:i" }}</td></tr>
+    <tr><th>変更日時</th><td>{{ object.modify_dt|date:"Y m/d H:i" }}</td></tr>
+    <tr><th>所有者</th><td>{{ object.owner }}</td></tr>
+    <tr><th>データ</th><td>
+        <textarea readonly rows="10" cols="60">{{ object.raw_data }}</textarea>
+    </td></tr>
+</table>
+
+<div style="margin-top: 20px;">
+<a href="{% url 'script:prod_from_scrpt' scrpt_id=object.id %}" style="margin-left:16px;">▶この台本から公演を作成</a>
+</div>
+
+{% endblock %}
+
+{% block head %}
+<style type="text/css">
+th {white-space: nowrap;}
+</style>
+{% endblock %}

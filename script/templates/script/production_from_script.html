@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>台本から公演を作成</h1>
+<form method="post">
+    {% csrf_token %}
+    <table>
+        <tr><th>台本</th><td>{{ view.script }}</td></tr>
+        {{ form }}
+    </table>
+    <input type="submit" value="作成">
+</form>
+{% endblock %}

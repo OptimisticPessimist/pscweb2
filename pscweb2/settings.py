@@ -34,6 +34,7 @@ INSTALLED_APPS = [
     'accounts.apps.AccountsConfig',
     'production.apps.ProductionConfig',
     'rehearsal.apps.RehearsalConfig',
+    'script.apps.ScriptConfig',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
