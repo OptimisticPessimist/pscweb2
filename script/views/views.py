@@ -6,6 +6,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.http import Http404
 from production.models import Production, ProdUser
 from script.models import Script
+from .view_func import *
 
 
 class ScriptList(LoginRequiredMixin, ListView):
@@ -37,12 +38,21 @@ class ProdFromScript(LoginRequiredMixin, CreateView):
         '''
         # URLconf から、Script を取得し、属性として持っておく
         scripts = Script.objects.filter(pk=self.kwargs['scrpt_id'])
-        if len(scripts) < 1:
+        if scripts.count() < 1:
             raise Http404
         self.script = scripts[0]
-    
+        
         return super().get(request, *args, **kwargs)
-
+    
+    def get_initial(self):
+        '''フォームのフィールドの初期値をオーバーライド
+        '''
+        initial = super().get_initial()
+        # GET リクエスト中に呼ばれた場合は script 属性で初期化
+        if self.request.method == 'GET':
+            initial['name'] = self.script.title
+        return initial
+    
     def form_valid(self, form):
         '''バリデーションを通った時
         '''
@@ -53,6 +63,11 @@ class ProdFromScript(LoginRequiredMixin, CreateView):
         prod_user = ProdUser(production=new_prod, user=self.request.user,
             is_owner=True)
         prod_user.save()
+        
+        # POST で取得した URLconf
+        scrpt_id = self.kwargs['scrpt_id']
+        # 台本を元に、公演にデータを追加する
+        add_data_from_script(new_prod.id, scrpt_id)
         
         messages.success(self.request, str(new_prod) + " を作成しました。")
         return super().form_valid(form)
