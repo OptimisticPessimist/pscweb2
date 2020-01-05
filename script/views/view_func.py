@@ -89,7 +89,7 @@ def data_from_fountain(text):
             # 少なくとも1個のシーンが検出されていれば
             if scenes:
                 # 今のシーンのその人物のセリフ数を出番としてカウント
-                char_name = e.element_text.lstrip('@')
+                char_name = e.element_text
                 current_count = scn_apprs.get(char_name, 0)
                 scn_apprs[char_name] = current_count + 1
                 # 登場人物に登録

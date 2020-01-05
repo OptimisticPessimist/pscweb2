@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "ca5f43862d6422165aadd9428b11fabe5193879d2ea4a4a5b90ca044b93c5324"
+            "sha256": "d61caffe004f1a2533aeeb0c46a78480a8a514e29269dcf7f203f276fb9a7a0e"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.6"
+            "python_version": "3.8"
         },
         "sources": [
             {
@@ -16,6 +16,13 @@
         ]
     },
     "default": {
+        "asgiref": {
+            "hashes": [
+                "sha256:7e06d934a7718bf3975acbf87780ba678957b87c7adc056f13b6215d610695a0",
+                "sha256:ea448f92fc35a0ef4b1508f53a04c4670255a3f33d22a81c8fc9c872036adbe5"
+            ],
+            "version": "==3.2.3"
+        },
         "dj-database-url": {
             "hashes": [
                 "sha256:4aeaeb1f573c74835b0686a2b46b85990571159ffc21aa57ecd4d1e1cb334163",
@@ -25,11 +32,11 @@
         },
         "django": {
             "hashes": [
-                "sha256:a4ad4f6f9c6a4b7af7e2deec8d0cbff28501852e5010d6c2dc695d3d1fae7ca0",
-                "sha256:fa98ec9cc9bf5d72a08ebf3654a9452e761fbb8566e3f80de199cbc15477e891"
+                "sha256:4f2c913303be4f874015993420bf0bd8fd2097a9c88e6b49c6a92f9bdd3fb13a",
+                "sha256:8c3575f81e11390893860d97e1e0154c47512f180ea55bd84ce8fa69ba8051ca"
             ],
             "index": "pypi",
-            "version": "==2.2.8"
+            "version": "==3.0.2"
         },
         "django-heroku": {
             "hashes": [
@@ -41,20 +48,22 @@
         },
         "gunicorn": {
             "hashes": [
-                "sha256:aa8e0b40b4157b36a5df5e599f45c9c76d6af43845ba3b3b0efe2c70473c2471",
-                "sha256:fa2662097c66f920f53f70621c6c58ca4a3c4d3434205e608e121b5b3b71f4f3"
+                "sha256:1904bb2b8a43658807108d59c3f3d56c2b6121a701161de0ddf9ad140073c626",
+                "sha256:cd4a810dd51bf497552cf3f863b575dabd73d6ad6a91075b65936b151cbf4f9c"
             ],
             "index": "pypi",
-            "version": "==19.9.0"
+            "version": "==20.0.4"
         },
         "mysqlclient": {
             "hashes": [
-                "sha256:425e733b05e359a714d6007c0fc44582be66b63e5a3df0a50949274ae16f4bc6",
-                "sha256:62e4770b6a797b9416bcf70488365b7d6b9c9066878108499c559293bb464380",
-                "sha256:f257d250f2675d0ef99bd318906f3cfc05cef4a2f385ea695ff32a3f04b9f9a7"
+                "sha256:4c82187dd6ab3607150fbb1fa5ef4643118f3da122b8ba31c3149ddd9cf0cb39",
+                "sha256:9bc249d5ce43e2432e6548d3b86bd604fc6ad8d2ca173aedb616dc89c4201ddb",
+                "sha256:9e6080a7aee4cc6a06b58b59239f20f1d259c1d2fddf68ddeed242d2311c7087",
+                "sha256:f3fdaa9a38752a3b214a6fe79d7cae3653731a53e577821f9187e67cbecb2e16",
+                "sha256:f646f8d17d02be0872291f258cce3813497bc7888cd4712a577fd1e719b2f213"
             ],
-            "index": "pypi",
-            "version": "==1.4.2.post1"
+            "path": "./mysqlclient-1.4.6-cp38-cp38-win_amd64.whl",
+            "version": "==1.4.6"
         },
         "psycopg2": {
             "hashes": [
@@ -90,21 +99,11 @@
         },
         "whitenoise": {
             "hashes": [
-                "sha256:22f79cf8f1f509639330f93886acaece8ec5ac5e9600c3b981d33c34e8a42dfd",
-                "sha256:6dfea214b7c12efd689007abf9afa87a426586e9dbc051873ad2c8e535e2a1ac"
+                "sha256:0f9137f74bd95fa54329ace88d8dc695fbe895369a632e35f7a136e003e41d73",
+                "sha256:62556265ec1011bd87113fb81b7516f52688887b7a010ee899ff1fd18fd22700"
             ],
-            "version": "==4.1.4"
+            "version": "==5.0.1"
         }
     },
-    "develop": {
-        "rope": {
-            "hashes": [
-                "sha256:6b728fdc3e98a83446c27a91fc5d56808a004f8beab7a31ab1d7224cecc7d969",
-                "sha256:c5c5a6a87f7b1a2095fb311135e2a3d1f194f5ecb96900fdd0a9100881f48aaf",
-                "sha256:f0dcf719b63200d492b85535ebe5ea9b29e0d0b8aebeb87fe03fc1a65924fdaf"
-            ],
-            "index": "pypi",
-            "version": "==0.14.0"
-        }
-    }
+    "develop": {}
 }
