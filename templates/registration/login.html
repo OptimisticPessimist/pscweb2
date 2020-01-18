@@ -19,6 +19,13 @@
     {% endif %}
 
     <div align="center">
+        <button type="button" class="button"
+        onclick="location.href='{% url 'social:begin' 'twitter' %}'">
+        Twitter でログイン</button>
+    </div>
+    
+    <!--
+    <div align="center">
         <form method="post" action="{% url 'login' %}">
             {% csrf_token %}
             <table>
@@ -29,5 +36,6 @@
             <input type="hidden" name="next" value="{{ next }}"/>
         </form>
     </div>
+    -->
 </section>
 {% endblock %}

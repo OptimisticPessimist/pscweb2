@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     'production.apps.ProductionConfig',
     'rehearsal.apps.RehearsalConfig',
     'script.apps.ScriptConfig',
+    'social_django',
 ]
 
 AUTH_USER_MODEL = 'accounts.User'
@@ -63,6 +64,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'social_django.context_processors.backends',
+                'social_django.context_processors.login_redirect',
             ],
         },
     },
@@ -126,6 +129,13 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 
+# For social-auth-app-django
+SOCIAL_AUTH_URL_NAMESPACE = 'social'
+AUTHENTICATION_BACKENDS = [
+    'social_core.backends.twitter.TwitterOAuth',
+    'django.contrib.auth.backends.ModelBackend',
+]
+
 # ローカル設定があれば開発環境、なければ本番環境
 DEBUG = False
 
@@ -138,3 +148,5 @@ if not DEBUG:
     import django_heroku
     django_heroku.settings(locals())
     SECRET_KEY = os.environ['SECRET_KEY']
+    SOCIAL_AUTH_TWITTER_KEY = os.environ['SOCIAL_AUTH_TWITTER_KEY']
+    SOCIAL_AUTH_TWITTER_SECRET = os.environ['SOCIAL_AUTH_TWITTER_SECRET']

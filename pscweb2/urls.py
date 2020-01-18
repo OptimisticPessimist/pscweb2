@@ -19,6 +19,7 @@ from production.views import ProdList
 
 urlpatterns = [
     path('', ProdList.as_view(), name='root'),
+    path('', include('social_django.urls')),
     path('accounts/', include('django.contrib.auth.urls')),
     path('admin/', admin.site.urls),
     path('prod/', include('production.urls')),
