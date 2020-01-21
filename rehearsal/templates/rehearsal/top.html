@@ -29,6 +29,8 @@
 <ul>
 <li><a href="{% url 'rehearsal:plc_list' prod_id=view.production.id %}">
     稽古場一覧</a></li>
+<li><a href="{% url 'production:usr_list' prod_id=view.production.id %}">
+    メンバ一覧</a></li>
 <li><a href="{% url 'rehearsal:atnd_change_list' prod_id=view.production.id %}">
     出欠変更履歴</a></li>
 </ul>

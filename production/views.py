@@ -138,3 +138,36 @@ class ProdDelete(LoginRequiredMixin, DeleteView):
         messages.success(
             self.request, str(self.object) + " を削除しました。")
         return result
+
+
+class UsrList(LoginRequiredMixin, ListView):
+    '''ProdUser のリストビュー
+    '''
+    model = ProdUser
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        prod_user = accessing_prod_user(self, kwargs['prod_id'])
+        if not prod_user:
+            raise PermissionDenied
+        
+        return super().get(request, *args, **kwargs)
+    
+    def get_queryset(self):
+        '''リストに表示するレコードをフィルタする
+        '''
+        prod_id=self.kwargs['prod_id']
+        prod_users = ProdUser.objects.filter(production__pk=prod_id)
+        return prod_users
+    
+    def get_context_data(self, **kwargs):
+        '''テンプレートに渡すパラメタを改変する
+        '''
+        context = super().get_context_data(**kwargs)
+        
+        # 戻るボタン用の prod_id をセット
+        context['prod_id'] = self.kwargs['prod_id']
+        
+        return context

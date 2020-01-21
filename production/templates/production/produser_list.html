@@ -1,0 +1,23 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="margin: 0;">
+<a href="{% url 'rehearsal:rhsl_top' prod_id=prod_id %}">◀</a>
+メンバ一覧
+</h1>
+<div>&nbsp;</div>
+<table>
+    <tr>
+        <th>ユーザ</th>
+        <th>所有権</th>
+        <th>編集権</th>
+    </tr>
+    {% for item in object_list %}
+    <tr>
+        <td>{{ item.user }}</td>
+        <td>{{ item.is_owner }}</td>
+        <td>{{ item.is_editor }}</td>
+    </tr>
+    {% endfor %}
+</table>
+{% endblock %}

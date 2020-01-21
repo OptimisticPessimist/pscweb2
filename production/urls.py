@@ -15,4 +15,7 @@ urlpatterns = [
     
     # /prod/prod_delete/1/ -> Production #1 Delete
     path('prod_delete/<int:pk>/', views.ProdDelete.as_view(), name='prod_delete'),
+    
+    # /prod/usr_list/1/ -> ProdUser List for Production #1
+    path('usr_list/<int:prod_id>/', views.UsrList.as_view(), name='usr_list'),
 ]
