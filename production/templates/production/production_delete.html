@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="margin: 0px;">
+<a href="{% url 'production:prod_list' %}">◀</a>
+公演の削除
+</h1>
+
+<form method="post">{% csrf_token %}
+    <p>この公演を削除しますか？</p>
+    <input type="submit" value="削除する">
+    <input type="button"
+        onclick="location.href='{% url 'production:prod_list' %}'"
+        value="キャンセル">
+</form>
+
+<table>
+    <tr><th>公演</th><td>{{ object.name }}</td></tr>
+</table>
+{% endblock %}

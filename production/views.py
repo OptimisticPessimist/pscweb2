@@ -1,8 +1,9 @@
 from django.views.generic import ListView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from rehearsal.views.view_func import *
 from .models import Production, ProdUser
 
 
@@ -27,7 +28,6 @@ class ProdCreate(LoginRequiredMixin, CreateView):
     '''
     model = Production
     fields = ('name',)
-    template_name_suffix = '_create'
     success_url = reverse_lazy('production:prod_list')
     
     def form_valid(self, form):
@@ -49,3 +49,92 @@ class ProdCreate(LoginRequiredMixin, CreateView):
         '''
         messages.warning(self.request, "作成できませんでした。")
         return super().form_invalid(form)
+
+
+class ProdUpdate(LoginRequiredMixin, UpdateView):
+    '''Production の更新ビュー
+    '''
+    model = Production
+    fields = ('name',)
+    success_url = reverse_lazy('production:prod_list')
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        prod_user = accessing_prod_user(self, kwargs['pk'])
+        if not prod_user:
+            raise PermissionDenied
+        # 所有権を持っていなければアクセス拒否
+        if not (prod_user.is_owner):
+            raise PermissionDenied
+        
+        return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        '''保存時のリクエストを受けるハンドラ
+        '''
+        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        prod_user = accessing_prod_user(self, kwargs['pk'])
+        if not prod_user:
+            raise PermissionDenied
+        # 所有権を持っていなければアクセス拒否
+        if not (prod_user.is_owner):
+            raise PermissionDenied
+        
+        return super().post(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        '''バリデーションを通った時
+        '''
+        messages.success(self.request, str(form.instance) + " を更新しました。")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        '''更新に失敗した時
+        '''
+        messages.warning(self.request, "更新できませんでした。")
+        return super().form_invalid(form)
+
+
+class ProdDelete(LoginRequiredMixin, DeleteView):
+    '''Production の削除ビュー
+    '''
+    model = Production
+    fields = ('name',)
+    template_name_suffix = '_delete'
+    success_url = reverse_lazy('production:prod_list')
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        prod_user = accessing_prod_user(self, kwargs['pk'])
+        if not prod_user:
+            raise PermissionDenied
+        # 所有権を持っていなければアクセス拒否
+        if not (prod_user.is_owner):
+            raise PermissionDenied
+        
+        return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        '''保存時のリクエストを受けるハンドラ
+        '''
+        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        prod_user = accessing_prod_user(self, kwargs['pk'])
+        if not prod_user:
+            raise PermissionDenied
+        # 所有権を持っていなければアクセス拒否
+        if not (prod_user.is_owner):
+            raise PermissionDenied
+        
+        return super().post(request, *args, **kwargs)
+    
+    def delete(self, request, *args, **kwargs):
+        '''削除した時のメッセージ
+        '''
+        result = super().delete(request, *args, **kwargs)
+        messages.success(
+            self.request, str(self.object) + " を削除しました。")
+        return result

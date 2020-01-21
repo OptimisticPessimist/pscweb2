@@ -149,7 +149,7 @@ class ProdBaseDeleteView(LoginRequiredMixin, DeleteView):
     '''アクセス権を検査する DeleteView の Base class
     '''
     template_name_suffix = '_delete'
-
+    
     def get(self, request, *args, **kwargs):
         '''表示時のリクエストを受けるハンドラ
         '''
@@ -157,6 +157,14 @@ class ProdBaseDeleteView(LoginRequiredMixin, DeleteView):
         test_edit_permission(self, self.get_object().production.id)
         
         return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        '''保存時のリクエストを受けるハンドラ
+        '''
+        # 編集権を検査する
+        test_edit_permission(self, self.get_object().production.id)
+        
+        return super().post(request, *args, **kwargs)
     
     def delete(self, request, *args, **kwargs):
         '''削除した時のメッセージ

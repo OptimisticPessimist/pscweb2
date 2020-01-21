@@ -17,6 +17,11 @@
         </td>
         <td>{{ item.is_owner }}</td>
         <td>{{ item.is_editor }}</td>
+        {% if item.is_owner %}
+        <td>
+            <a href="{% url 'production:prod_update' pk=item.production.id %}" class="changelink">編集</a>
+        </td>
+        {% endif %}
     </tr>
     {% endfor %}
 </table>
