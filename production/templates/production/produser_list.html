@@ -14,9 +14,14 @@
     </tr>
     {% for item in object_list %}
     <tr>
-        <td>{{ item.user }}</td>
+        <td>{{ item }}</td>
         <td>{{ item.is_owner }}</td>
         <td>{{ item.is_editor }}</td>
+        {% if view.prod_user.is_owner %}
+        <td>
+            <a href="{% url 'production:usr_update' pk=item.id %}" class="changelink">編集</a>
+        </td>
+        {% endif %}
     </tr>
     {% endfor %}
 </table>

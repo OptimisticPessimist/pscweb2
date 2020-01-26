@@ -26,4 +26,21 @@ class ProdUser(models.Model):
         verbose_name = verbose_name_plural = '公演ユーザ'
     
     def __str__(self):
-        return '{}@{}'.format(self.user, self.production)
+        first_name = self.user.first_name
+        last_name = self.user.last_name
+        
+        # 姓と名からフルネームを生成
+        if (len(first_name) < 1) and (len(last_name) < 1):
+            full_name = ''
+        elif len(first_name) < 1:
+            full_name = last_name
+        elif len(last_name) < 1:
+            full_name = first_name
+        else:
+            full_name = f'{last_name}, {first_name}'
+        
+        # フルネーム (なければユーザ名) を返す
+        if len(full_name) > 0:
+            return full_name
+        else:
+            return self.user.username

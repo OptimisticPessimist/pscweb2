@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="margin: 0px;">
+<a href="{% url 'production:usr_list' prod_id=object.production.id %}">◀</a>
+公演ユーザの編集
+</h1>
+
+{% if object != view.prod_user %}
+<div align="right"><a href="{% url 'production:usr_delete' pk=object.id %}" class="deletelink">削除</a></div>
+{% else %}
+<div>&nbsp;</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <table>
+    <tr><th>公演</th><td>{{ object.production }}</td></tr>
+    <tr><th>公演ユーザ</th><td>{{ object }}</td></tr>
+        {{ form }}
+    </table>
+    {% if object %}
+    <input type="submit" value="更新">
+    {% else %}
+    <input type="submit" value="作成">
+    {% endif %}
+</form>
+{% endblock %}

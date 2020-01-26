@@ -101,7 +101,6 @@ class ProdDelete(LoginRequiredMixin, DeleteView):
     '''Production の削除ビュー
     '''
     model = Production
-    fields = ('name',)
     template_name_suffix = '_delete'
     success_url = reverse_lazy('production:prod_list')
     
@@ -153,6 +152,9 @@ class UsrList(LoginRequiredMixin, ListView):
         if not prod_user:
             raise PermissionDenied
         
+        # テンプレートから参照できるよう、ビューの属性にしておく
+        self.prod_user = prod_user
+        
         return super().get(request, *args, **kwargs)
     
     def get_queryset(self):
@@ -171,3 +173,116 @@ class UsrList(LoginRequiredMixin, ListView):
         context['prod_id'] = self.kwargs['prod_id']
         
         return context
+
+
+class UsrUpdate(LoginRequiredMixin, UpdateView):
+    '''ProdUser の更新ビュー
+    '''
+    model = ProdUser
+    fields = ('is_editor',)
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        prod_id = self.get_object().production.id
+        prod_user = accessing_prod_user(self, prod_id)
+        if not prod_user:
+            raise PermissionDenied
+        # 所有権を持っていなければアクセス拒否
+        if not (prod_user.is_owner):
+            raise PermissionDenied
+        
+        # テンプレートから参照できるよう、ビューの属性にしておく
+        self.prod_user = prod_user
+        
+        return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        '''保存時のリクエストを受けるハンドラ
+        '''
+        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        prod_id = self.get_object().production.id
+        prod_user = accessing_prod_user(self, prod_id)
+        if not prod_user:
+            raise PermissionDenied
+        # 所有権を持っていなければアクセス拒否
+        if not (prod_user.is_owner):
+            raise PermissionDenied
+        
+        return super().post(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        '''追加に成功した時の遷移先を動的に与える
+        '''
+        prod_id = self.object.production.id
+        url = reverse_lazy('production:usr_list', kwargs={'prod_id': prod_id})
+        return url
+    
+    def form_valid(self, form):
+        '''バリデーションを通った時
+        '''
+        messages.success(self.request, str(form.instance) + " を更新しました。")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        '''更新に失敗した時
+        '''
+        messages.warning(self.request, "更新できませんでした。")
+        return super().form_invalid(form)
+
+
+class UsrDelete(LoginRequiredMixin, DeleteView):
+    '''ProdUser の削除ビュー
+    '''
+    model = ProdUser
+    template_name_suffix = '_delete'
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        prod_id = self.get_object().production.id
+        prod_user = accessing_prod_user(self, prod_id)
+        if not prod_user:
+            raise PermissionDenied
+        # 所有権を持っていなければアクセス拒否
+        if not (prod_user.is_owner):
+            raise PermissionDenied
+        # 自分自身を削除することはできない
+        if self.get_object() == prod_user:
+            raise PermissionDenied
+        
+        return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        '''保存時のリクエストを受けるハンドラ
+        '''
+        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        prod_id = self.get_object().production.id
+        prod_user = accessing_prod_user(self, prod_id)
+        if not prod_user:
+            raise PermissionDenied
+        # 所有権を持っていなければアクセス拒否
+        if not (prod_user.is_owner):
+            raise PermissionDenied
+        # 自分自身を削除することはできない
+        if self.get_object() == prod_user:
+            raise PermissionDenied
+        
+        return super().post(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        '''削除に成功した時の遷移先を動的に与える
+        '''
+        prod_id = self.object.production.id
+        url = reverse_lazy('production:usr_list', kwargs={'prod_id': prod_id})
+        return url
+    
+    def delete(self, request, *args, **kwargs):
+        '''削除した時のメッセージ
+        '''
+        result = super().delete(request, *args, **kwargs)
+        messages.success(
+            self.request, str(self.object) + " を削除しました。")
+        return result

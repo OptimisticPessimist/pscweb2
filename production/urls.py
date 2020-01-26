@@ -18,4 +18,10 @@ urlpatterns = [
     
     # /prod/usr_list/1/ -> ProdUser List for Production #1
     path('usr_list/<int:prod_id>/', views.UsrList.as_view(), name='usr_list'),
+    
+    # /prod/usr_update/1/ -> ProdUser #1 Update
+    path('usr_update/<int:pk>/', views.UsrUpdate.as_view(), name='usr_update'),
+    
+    # /prod/usr_delete/1/ -> ProdUser #1 Delete
+    path('usr_delete/<int:pk>/', views.UsrDelete.as_view(), name='usr_delete'),
 ]
