@@ -6,7 +6,7 @@ from django.views.generic import TemplateView
 from django.http import Http404
 from django.core.exceptions import PermissionDenied
 from rehearsal.models import Rehearsal, Actor, Attendance, Character, Scene, Appearance
-from .view_func import *
+from production.view_func import *
 
 
 class AtndGraph(LoginRequiredMixin, TemplateView):

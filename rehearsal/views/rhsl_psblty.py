@@ -4,7 +4,7 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from rehearsal.models import Rehearsal, Actor, Attendance, Character, Scene, Appearance
 from rehearsal.model_func import *
-from .view_func import *
+from production.view_func import *
 
 
 class RhslPossibility(LoginRequiredMixin, TemplateView):

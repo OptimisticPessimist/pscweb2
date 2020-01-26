@@ -3,7 +3,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from rehearsal.models import Scene, Character, Actor, Appearance
-from .view_func import *
+from production.view_func import *
 
 
 class ApprTable(LoginRequiredMixin, TemplateView):

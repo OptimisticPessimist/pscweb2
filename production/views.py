@@ -3,7 +3,7 @@ from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
-from rehearsal.views.view_func import *
+from .view_func import *
 from .models import Production, ProdUser
 
 
@@ -61,26 +61,16 @@ class ProdUpdate(LoginRequiredMixin, UpdateView):
     def get(self, request, *args, **kwargs):
         '''表示時のリクエストを受けるハンドラ
         '''
-        # アクセス情報から公演ユーザを取得しアクセス権を検査する
-        prod_user = accessing_prod_user(self, kwargs['pk'])
-        if not prod_user:
-            raise PermissionDenied
-        # 所有権を持っていなければアクセス拒否
-        if not (prod_user.is_owner):
-            raise PermissionDenied
+        # 所有権を検査する
+        test_owner_permission(self, kwargs['pk'])
         
         return super().get(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs):
         '''保存時のリクエストを受けるハンドラ
         '''
-        # アクセス情報から公演ユーザを取得しアクセス権を検査する
-        prod_user = accessing_prod_user(self, kwargs['pk'])
-        if not prod_user:
-            raise PermissionDenied
-        # 所有権を持っていなければアクセス拒否
-        if not (prod_user.is_owner):
-            raise PermissionDenied
+        # 所有権を検査する
+        test_owner_permission(self, kwargs['pk'])
         
         return super().post(request, *args, **kwargs)
     
@@ -107,26 +97,16 @@ class ProdDelete(LoginRequiredMixin, DeleteView):
     def get(self, request, *args, **kwargs):
         '''表示時のリクエストを受けるハンドラ
         '''
-        # アクセス情報から公演ユーザを取得しアクセス権を検査する
-        prod_user = accessing_prod_user(self, kwargs['pk'])
-        if not prod_user:
-            raise PermissionDenied
-        # 所有権を持っていなければアクセス拒否
-        if not (prod_user.is_owner):
-            raise PermissionDenied
+        # 所有権を検査する
+        test_owner_permission(self, kwargs['pk'])
         
         return super().get(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs):
         '''保存時のリクエストを受けるハンドラ
         '''
-        # アクセス情報から公演ユーザを取得しアクセス権を検査する
-        prod_user = accessing_prod_user(self, kwargs['pk'])
-        if not prod_user:
-            raise PermissionDenied
-        # 所有権を持っていなければアクセス拒否
-        if not (prod_user.is_owner):
-            raise PermissionDenied
+        # 所有権を検査する
+        test_owner_permission(self, kwargs['pk'])
         
         return super().post(request, *args, **kwargs)
     
@@ -186,12 +166,7 @@ class UsrUpdate(LoginRequiredMixin, UpdateView):
         '''
         # アクセス情報から公演ユーザを取得しアクセス権を検査する
         prod_id = self.get_object().production.id
-        prod_user = accessing_prod_user(self, prod_id)
-        if not prod_user:
-            raise PermissionDenied
-        # 所有権を持っていなければアクセス拒否
-        if not (prod_user.is_owner):
-            raise PermissionDenied
+        prod_user = test_owner_permission(self, prod_id)
         
         # テンプレートから参照できるよう、ビューの属性にしておく
         self.prod_user = prod_user
@@ -203,12 +178,7 @@ class UsrUpdate(LoginRequiredMixin, UpdateView):
         '''
         # アクセス情報から公演ユーザを取得しアクセス権を検査する
         prod_id = self.get_object().production.id
-        prod_user = accessing_prod_user(self, prod_id)
-        if not prod_user:
-            raise PermissionDenied
-        # 所有権を持っていなければアクセス拒否
-        if not (prod_user.is_owner):
-            raise PermissionDenied
+        prod_user = test_owner_permission(self, prod_id)
         
         return super().post(request, *args, **kwargs)
     
@@ -243,12 +213,8 @@ class UsrDelete(LoginRequiredMixin, DeleteView):
         '''
         # アクセス情報から公演ユーザを取得しアクセス権を検査する
         prod_id = self.get_object().production.id
-        prod_user = accessing_prod_user(self, prod_id)
-        if not prod_user:
-            raise PermissionDenied
-        # 所有権を持っていなければアクセス拒否
-        if not (prod_user.is_owner):
-            raise PermissionDenied
+        prod_user = test_owner_permission(self, prod_id)
+
         # 自分自身を削除することはできない
         if self.get_object() == prod_user:
             raise PermissionDenied
@@ -260,12 +226,8 @@ class UsrDelete(LoginRequiredMixin, DeleteView):
         '''
         # アクセス情報から公演ユーザを取得しアクセス権を検査する
         prod_id = self.get_object().production.id
-        prod_user = accessing_prod_user(self, prod_id)
-        if not prod_user:
-            raise PermissionDenied
-        # 所有権を持っていなければアクセス拒否
-        if not (prod_user.is_owner):
-            raise PermissionDenied
+        prod_user = test_owner_permission(self, prod_id)
+
         # 自分自身を削除することはできない
         if self.get_object() == prod_user:
             raise PermissionDenied

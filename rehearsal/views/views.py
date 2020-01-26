@@ -11,7 +11,7 @@ from rehearsal.models import Rehearsal, Scene, Place, Facility, Character,\
     Actor, Appearance, ScnComment, Attendance, AtndChangeLog
 from rehearsal.forms import RhslForm, ChrForm, ActrForm, ScnApprForm,\
     ChrApprForm, AtndForm
-from .view_func import *
+from production.view_func import *
 
 
 class ProdBaseListView(LoginRequiredMixin, ListView):
