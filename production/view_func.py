@@ -27,7 +27,7 @@ def test_edit_permission(view, prod_id=None):
     Returns
     -------
     prod_user : ProdUser
-        所有権または編集権を持っているアクセス中の ProdUser
+        編集権を持っているアクセス中の ProdUser
     '''
     # アクセス情報から公演ユーザを取得する
     prod_user = accessing_prod_user(view, prod_id=prod_id)
@@ -47,14 +47,14 @@ def test_owner_permission(view, prod_id=None):
     Returns
     -------
     prod_user : ProdUser
-        所有権権を持っているアクセス中の ProdUser
+        所有権を持っているアクセス中の ProdUser
     '''
     # アクセス情報から公演ユーザを取得する
     prod_user = accessing_prod_user(view, prod_id=prod_id)
     if not prod_user:
         raise PermissionDenied
     
-    # 所有権を持っていなければアクセス拒否
+    # 所有権または編集権を持っていなければアクセス拒否
     if not (prod_user.is_owner):
         raise PermissionDenied
     

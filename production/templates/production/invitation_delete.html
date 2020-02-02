@@ -1,0 +1,24 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="margin: 0px;">
+<a href="{% url 'production:usr_list' prod_id=object.production.id %}">◀</a>
+座組への招待の削除
+</h1>
+
+<form method="post">{% csrf_token %}
+    <p>この招待を削除しますか？</p>
+    <input type="submit" value="削除する">
+    <input type="button"
+        onclick="location.href='{% url 'production:usr_list' prod_id=object.production.id %}'"
+        value="キャンセル">
+</form>
+
+<table>
+    <tr><th>公演</th><td>{{ object.production }}</td></tr>
+    <tr><th>招待される人</th><td>{{ object.invitee.username }}</td></tr>
+    <tr><th>姓</th><td>{{ object.invitee.last_name }}</td></tr>
+    <tr><th>名</th><td>{{ object.invitee.first_name }}</td></tr>
+    <tr><th>期限</th><td>{{ object.exp_dt }}</td></tr>
+</table>
+{% endblock %}

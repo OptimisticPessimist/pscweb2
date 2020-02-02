@@ -1,5 +1,7 @@
 from django import forms
-from .models import ProdUser
+from django.contrib.auth import get_user_model
+from .models import ProdUser, Invitation
+import accounts
 
 
 class ProdUserAdminForm(forms.ModelForm):
@@ -55,3 +57,33 @@ class ProdUserAdminForm(forms.ModelForm):
 #         if commit:
 #             m.save()
 #         return m
+
+
+class InvtForm(forms.ModelForm):
+    '''座組への招待の追加フォーム
+    '''
+    class Meta:
+        model = Invitation
+        fields = ('invitee',)
+    
+    def __init__(self, *args, **kwargs):
+        # view で追加したパラメタを抜き取る
+        production = kwargs.pop('production')
+        
+        super().__init__(*args, **kwargs)
+        
+        # 招待される人は、公演ユーザ以外かつ招待中でないこと
+        
+        # 公演ユーザのユーザ ID リスト
+        prod_users = ProdUser.objects.filter(production=production)
+        prod_user_user_ids = [prod_user.user.id for prod_user in prod_users]
+        # 招待中のユーザの ID リスト
+        invitations = Invitation.objects.filter(production=production)
+        current_invitee_ids = [invt.invitee.id for invt in invitations]
+        
+        # 公演ユーザと招待中のユーザを除いたユーザ
+        user_model = get_user_model()
+        invitee_choice = user_model.objects.exclude(id__in=prod_user_user_ids)\
+            .exclude(id__in=current_invitee_ids)
+        
+        self.fields['invitee'].queryset = invitee_choice

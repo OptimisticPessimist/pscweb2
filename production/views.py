@@ -1,10 +1,12 @@
+from datetime import datetime, timedelta, timezone
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from .view_func import *
-from .models import Production, ProdUser
+from .models import Production, ProdUser, Invitation
+from .forms import InvtForm
 
 
 class ProdList(LoginRequiredMixin, ListView):
@@ -135,6 +137,9 @@ class UsrList(LoginRequiredMixin, ListView):
         # テンプレートから参照できるよう、ビューの属性にしておく
         self.prod_user = prod_user
         
+        # 招待中のユーザを表示するため、ビューの属性にする
+        self.invitation = Invitation.objects.filter(production=prod_user.production)
+        
         return super().get(request, *args, **kwargs)
     
     def get_queryset(self):
@@ -164,7 +169,7 @@ class UsrUpdate(LoginRequiredMixin, UpdateView):
     def get(self, request, *args, **kwargs):
         '''表示時のリクエストを受けるハンドラ
         '''
-        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        # 所有権を検査してアクセス中の公演ユーザを取得する
         prod_id = self.get_object().production.id
         prod_user = test_owner_permission(self, prod_id)
         
@@ -176,7 +181,7 @@ class UsrUpdate(LoginRequiredMixin, UpdateView):
     def post(self, request, *args, **kwargs):
         '''保存時のリクエストを受けるハンドラ
         '''
-        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        # 所有権を検査してアクセス中の公演ユーザを取得する
         prod_id = self.get_object().production.id
         prod_user = test_owner_permission(self, prod_id)
         
@@ -211,7 +216,7 @@ class UsrDelete(LoginRequiredMixin, DeleteView):
     def get(self, request, *args, **kwargs):
         '''表示時のリクエストを受けるハンドラ
         '''
-        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        # 所有権を検査してアクセス中の公演ユーザを取得する
         prod_id = self.get_object().production.id
         prod_user = test_owner_permission(self, prod_id)
 
@@ -224,13 +229,122 @@ class UsrDelete(LoginRequiredMixin, DeleteView):
     def post(self, request, *args, **kwargs):
         '''保存時のリクエストを受けるハンドラ
         '''
-        # アクセス情報から公演ユーザを取得しアクセス権を検査する
+        # 所有権を検査してアクセス中の公演ユーザを取得する
         prod_id = self.get_object().production.id
         prod_user = test_owner_permission(self, prod_id)
 
         # 自分自身を削除することはできない
         if self.get_object() == prod_user:
             raise PermissionDenied
+        
+        return super().post(request, *args, **kwargs)
+    
+    def get_success_url(self):
+        '''削除に成功した時の遷移先を動的に与える
+        '''
+        prod_id = self.object.production.id
+        url = reverse_lazy('production:usr_list', kwargs={'prod_id': prod_id})
+        return url
+    
+    def delete(self, request, *args, **kwargs):
+        '''削除した時のメッセージ
+        '''
+        result = super().delete(request, *args, **kwargs)
+        messages.success(
+            self.request, str(self.object) + " を削除しました。")
+        return result
+
+
+class InvtCreate(LoginRequiredMixin, CreateView):
+    '''Invitation の追加ビュー
+    '''
+    model = Invitation
+    form_class = InvtForm
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # 所有権を検査してアクセス中の公演ユーザを取得する
+        prod_user = test_owner_permission(self)
+        
+        # production を view の属性として持っておく
+        # テンプレートで固定要素として表示するため
+        self.production = prod_user.production
+        
+        return super().get(request, *args, **kwargs)
+    
+    def get_form_kwargs(self):
+        '''フォームに渡す情報を改変する
+        '''
+        kwargs = super().get_form_kwargs()
+        
+        # フォーム側でバリデーションに使うので production を渡す
+        kwargs['production'] = self.production
+        
+        return kwargs
+    
+    def post(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # 所有権を検査してアクセス中の公演ユーザを取得する
+        prod_user = test_owner_permission(self)
+        
+        # prod_user, production を view の属性として持っておく
+        # バリデーションと保存時に使うため
+        self.prod_user = prod_user
+        self.production = prod_user.production
+        
+        return super().post(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        '''バリデーションを通った時
+        '''
+        # 追加しようとするレコードの各フィールドをセット
+        instance = form.save(commit=False)
+        instance.production = self.production
+        instance.inviter = self.prod_user.user
+        # 期限は7日
+        # デフォルトで UTC で保存されるが念の為 UTC を指定
+        instance.exp_dt = datetime.now(timezone.utc) + timedelta(days=7)
+        
+        messages.success(self.request, str(instance.invitee) + " さんを招待しました。")
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        '''追加に成功した時の遷移先を動的に与える
+        '''
+        prod_id = self.prod_user.production.id
+        url = reverse_lazy('production:usr_list', kwargs={'prod_id': prod_id})
+        return url
+    
+    def form_invalid(self, form):
+        '''追加に失敗した時
+        '''
+        messages.warning(self.request, "招待できませんでした。")
+        return super().form_invalid(form)
+
+
+class InvtDelete(LoginRequiredMixin, DeleteView):
+    '''Invitation の削除ビュー
+    '''
+    model = Invitation
+    template_name_suffix = '_delete'
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # 所有権を検査する
+        prod_id = self.get_object().production.id
+        test_owner_permission(self, prod_id)
+        
+        return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        '''保存時のリクエストを受けるハンドラ
+        '''
+        # 所有権を検査する
+        prod_id = self.get_object().production.id
+        test_owner_permission(self, prod_id)
         
         return super().post(request, *args, **kwargs)
     

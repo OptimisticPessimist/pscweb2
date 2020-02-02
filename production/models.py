@@ -3,6 +3,8 @@ from django.db import models
 
 
 class Production(models.Model):
+    '''公演
+    '''
     name = models.CharField('公演名', max_length=50)
     
     class Meta:
@@ -44,3 +46,23 @@ class ProdUser(models.Model):
             return full_name
         else:
             return self.user.username
+
+
+class Invitation(models.Model):
+    '''座組への招待
+    '''
+    production = models.ForeignKey(Production, verbose_name='公演',
+        on_delete=models.CASCADE)
+    inviter = models.ForeignKey(settings.AUTH_USER_MODEL,
+        verbose_name='招待する人',
+        related_name='inviter', on_delete=models.CASCADE)
+    invitee = models.ForeignKey(settings.AUTH_USER_MODEL,
+        verbose_name='招待される人',
+        related_name='invitee', on_delete=models.CASCADE)
+    exp_dt = models.DateTimeField(verbose_name='期限')
+    
+    class Meta:
+        verbose_name = verbose_name_plural = '座組への招待'
+    
+    def __str__(self):
+        return f'{self.invitee} さんへの招待'

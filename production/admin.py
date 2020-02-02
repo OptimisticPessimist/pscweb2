@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Production, ProdUser
+from .models import Production, ProdUser, Invitation
 from .forms import ProdUserAdminForm
 
 
@@ -30,3 +30,4 @@ class ProdUserAdmin(admin.ModelAdmin):
 
 admin.site.register(Production)
 admin.site.register(ProdUser, ProdUserAdmin)
+admin.site.register(Invitation)
