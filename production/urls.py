@@ -30,4 +30,7 @@ urlpatterns = [
 
     # /prod/invt_delete/1/ -> Invitation #1 Delete
     path('invt_delete/<int:pk>/', views.InvtDelete.as_view(), name='invt_delete'),
+
+    # /prod/prod_join/1/ -> Join to Production via Invitation #1
+    path('prod_join/<int:invt_id>/', views.ProdJoin.as_view(), name='prod_join'),
 ]

@@ -1,6 +1,7 @@
 from datetime import datetime, timedelta, timezone
 from django.views.generic import ListView
 from django.views.generic.edit import CreateView, UpdateView, DeleteView
+from django.http import Http404
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -16,6 +17,16 @@ class ProdList(LoginRequiredMixin, ListView):
     '''
     model = ProdUser
     template_name = 'production/production_list.html'
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # 座組への招待を表示するため、ビューの属性にする
+        now = datetime.now(timezone.utc)
+        self.invitations = Invitation.objects.filter(invitee=self.request.user,
+            exp_dt__gt=now)
+        
+        return super().get(request, *args, **kwargs)
     
     def get_queryset(self):
         '''リストに表示するレコードをフィルタする
@@ -138,7 +149,7 @@ class UsrList(LoginRequiredMixin, ListView):
         self.prod_user = prod_user
         
         # 招待中のユーザを表示するため、ビューの属性にする
-        self.invitation = Invitation.objects.filter(production=prod_user.production)
+        self.invitations = Invitation.objects.filter(production=prod_user.production)
         
         return super().get(request, *args, **kwargs)
     
@@ -362,3 +373,83 @@ class InvtDelete(LoginRequiredMixin, DeleteView):
         messages.success(
             self.request, str(self.object) + " を削除しました。")
         return result
+
+
+class ProdJoin(LoginRequiredMixin, CreateView):
+    '''公演に参加するビュー
+    '''
+    model = ProdUser
+    fields = ('production', 'user')
+    template_name = 'production/production_join.html'
+    success_url = reverse_lazy('production:prod_list')
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # 招待されているか検査し、参加できる公演を取得
+        self.production = self.production_to_join()
+        
+        return super().get(request, *args, **kwargs)
+    
+    def post(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # 招待されているか検査し、参加できる公演を取得
+        self.production = self.production_to_join()
+        
+        return super().post(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        '''バリデーションを通った時
+        '''
+        # 招待を検査
+        invt_id = self.kwargs['invt_id'];
+        invts = Invitation.objects.filter(id=invt_id)
+        if len(invts) < 1:
+            return self.form_invalid(form)
+        invt = invts[0]
+        
+        # 保存するレコードを取得する
+        new_prod_user = form.save(commit=False)
+        
+        # 正しい公演がセットされているか
+        if new_prod_user.production != invt.production:
+            return self.form_invalid(form)
+        
+        # 正しいユーザがセットされているか
+        if new_prod_user.user != invt.invitee:
+            return self.form_invalid(form)
+        
+        # 招待を削除
+        invt.delete()
+        
+        messages.success(self.request, str(invt.production) + " に参加しました。")
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        '''参加に失敗した時
+        '''
+        messages.warning(self.request, "参加できませんでした。")
+        return super().form_invalid(form)
+
+    def production_to_join(self):
+        '''招待されているか検査し、参加できる公演を返す
+        '''
+        # 招待がなければ 404 エラーを投げる
+        invt_id = self.kwargs['invt_id'];
+        invts = Invitation.objects.filter(id=invt_id)
+        if len(invts) < 1:
+            raise Http404
+        invt = invts[0]
+        
+        # 招待が期限切れなら 404 エラーを投げる
+        now = datetime.now(timezone.utc)
+        if now > invt.exp_dt:
+            raise Http404
+        
+        # アクセス中のユーザが invitee でなければ PermissionDenied
+        user = self.request.user
+        if user != invt.invitee:
+            raise PermissionDenied
+        
+        return invt.production

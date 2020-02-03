@@ -1,3 +1,4 @@
+from datetime import datetime, timezone
 from django.conf import settings
 from django.db import models
 
@@ -63,6 +64,13 @@ class Invitation(models.Model):
     
     class Meta:
         verbose_name = verbose_name_plural = '座組への招待'
+        ordering = ['exp_dt']
     
     def __str__(self):
         return f'{self.invitee} さんへの招待'
+    
+    def expired(self):
+        '''この招待が期限切れかどうかを返す
+        '''
+        now = datetime.now(timezone.utc)
+        return now > self.exp_dt

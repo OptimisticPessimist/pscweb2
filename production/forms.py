@@ -84,6 +84,6 @@ class InvtForm(forms.ModelForm):
         # 公演ユーザと招待中のユーザを除いたユーザ
         user_model = get_user_model()
         invitee_choice = user_model.objects.exclude(id__in=prod_user_user_ids)\
-            .exclude(id__in=current_invitee_ids)
+            .exclude(id__in=current_invitee_ids).order_by('username')
         
         self.fields['invitee'].queryset = invitee_choice

@@ -3,6 +3,32 @@
 {% block content %}
 <h1 style="margin: 0px;">公演一覧</h1>
 <div align="right"><a href="{% url 'production:prod_create' %}" class="addlink">新規作成</a></div>
+
+{% if view.invitations %}
+<div style="border:solid thin lightgray; border-radius:10px; padding: 10px; margin:5px 0 20px;">
+<p><strong>招待されている公演</strong></p>
+<table>
+    <tr>
+        <th>公演名</th>
+        <th>招待主</th>
+        <th>招待の期限</th>
+    </tr>
+    {% for item in view.invitations %}
+    <tr>
+        <td>{{ item.production }}</td>
+        <td>{{ item.inviter.username }}</td>
+        {% if item.expired %}
+            <td style="color:red;">{{ item.exp_dt }}</td>
+        {% else %}
+            <td>{{ item.exp_dt }}</td>
+        {% endif %}
+        <td><a href="{% url 'production:prod_join' invt_id=item.id %}" class="addlink">参加</a></td>
+    </tr>
+{% endfor %}
+</table>
+</div>
+{% endif %}
+
 <table>
     <tr>
         <th>公演</th>

@@ -11,7 +11,7 @@
 <div>&nbsp;</div>
 {% endif %}
 
-{% if view.prod_user.is_owner and view.invitation %}
+{% if view.prod_user.is_owner and view.invitations %}
 <div style="border:solid thin lightgray; border-radius:10px; padding: 10px; margin:5px 0 20px;">
 <p><strong>招待中のユーザ</strong></p>
 <table>
@@ -21,17 +21,20 @@
         <th>名</th>
         <th>招待の期限</th>
     </tr>
-    {% for item in view.invitation %}
+    {% for item in view.invitations %}
     <tr>
         <td>{{ item.invitee.username }}</td>
         <td>{{ item.invitee.last_name }}</td>
         <td>{{ item.invitee.first_name }}</td>
-        <td>{{ item.exp_dt }}</td>
+        {% if item.expired %}
+            <td style="color:red;">{{ item.exp_dt }}</td>
+        {% else %}
+            <td>{{ item.exp_dt }}</td>
+        {% endif %}
         <td><a href="{% url 'production:invt_delete' pk=item.id %}" class="deletelink">削除</a></td>
     </tr>
 {% endfor %}
 </table>
-<!-- div style="margin:20px 0 20px;"><hr /></div -->
 </div>
 {% endif %}
 

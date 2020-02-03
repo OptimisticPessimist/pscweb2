@@ -33,7 +33,11 @@
             <ul>
                 {% if user.is_authenticated %}
                 <li>
-                    <a href="{% url 'logout' %}" class="logout">Logout</a></li>
+                <select name="select" onChange="location.href=value;">
+                <option value="#">{{ user.username }}</option>
+                <option value="{% url 'logout' %}" class="logout">Logout</option>
+                </select>
+                </li>
                 {% else %}
                 <li>
                     <a href="{% url 'login' %}" class="login">Login</a></li>

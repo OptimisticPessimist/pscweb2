@@ -36,6 +36,13 @@ header ul li {
     display: inline;
 }
 
+header select {
+    color: rgb(255, 255, 204);
+    background: rgb(65, 118, 144);
+    border: none;
+    cursor: pointer;
+}
+
 div.content{
     margin: 40px 0px 0px;
     padding: 10px;

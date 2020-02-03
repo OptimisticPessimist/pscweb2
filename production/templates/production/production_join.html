@@ -1,0 +1,21 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="margin: 0px;">
+<a href="{% url 'production:prod_list' %}">◀</a>
+公演に参加
+</h1>
+
+<div>&nbsp;</div>
+
+<p>
+{{ view.production }} に招待されています。参加しますか？
+</p>
+
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="production" value="{{ view.production.id }}">
+    <input type="hidden" name="user" value="{{ view.request.user.id }}">
+    <input type="submit" value="参加">
+</form>
+{% endblock %}
