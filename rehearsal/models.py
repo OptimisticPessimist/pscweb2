@@ -103,7 +103,7 @@ class Actor(models.Model):
         on_delete=models.CASCADE)
     name = models.CharField('名前', max_length=50)
     short_name = models.CharField('短縮名', max_length=5, blank=True)
-    prod_user = models.ForeignKey(ProdUser, verbose_name='アカウント',
+    prod_user = models.ForeignKey(ProdUser, verbose_name='ユーザ',
         on_delete=models.SET_NULL, blank=True, null=True)
     
     class Meta:

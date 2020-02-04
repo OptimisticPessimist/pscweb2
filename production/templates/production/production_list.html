@@ -1,8 +1,6 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 style="margin: 0px;">公演一覧</h1>
-<div align="right"><a href="{% url 'production:prod_create' %}" class="addlink">新規作成</a></div>
 
 {% if view.invitations %}
 <div style="border:solid thin lightgray; border-radius:10px; padding: 10px; margin:5px 0 20px;">
@@ -10,7 +8,7 @@
 <table>
     <tr>
         <th>公演名</th>
-        <th>招待主</th>
+        <th>招待主の ID</th>
         <th>招待の期限</th>
     </tr>
     {% for item in view.invitations %}
@@ -22,12 +20,18 @@
         {% else %}
             <td>{{ item.exp_dt }}</td>
         {% endif %}
-        <td><a href="{% url 'production:prod_join' invt_id=item.id %}" class="addlink">参加</a></td>
+        <td>
+            <a href="{% url 'production:prod_join' invt_id=item.id %}" class="addlink">参加</a>
+            <a href="{% url 'production:invt_delete' pk=item.id from='prod_list' %}" class="deletelink">削除</a>
+        </td>
     </tr>
 {% endfor %}
 </table>
 </div>
 {% endif %}
+
+<h1 style="margin: 0px;">公演一覧</h1>
+<div align="right"><a href="{% url 'production:prod_create' %}" class="addlink">新規作成</a></div>
 
 <table>
     <tr>

@@ -17,5 +17,8 @@
     <input type="hidden" name="production" value="{{ view.production.id }}">
     <input type="hidden" name="user" value="{{ view.request.user.id }}">
     <input type="submit" value="参加">
+    <input type="button"
+        onclick="location.href='{% url 'production:prod_list' %}'"
+        value="あとで">
 </form>
 {% endblock %}

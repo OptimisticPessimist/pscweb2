@@ -1,22 +1,13 @@
 {% extends 'base.html' %}
 
 {% block content %}
-<h1 style="margin: 0;">
-<a href="{% url 'rehearsal:rhsl_top' prod_id=prod_id %}">◀</a>
-メンバ一覧
-</h1>
-{% if view.prod_user.is_owner %}
-<div align="right"><a href="{% url 'production:invt_create' prod_id=prod_id %}" class="addlink">招待する</a></div>
-{% else %}
-<div>&nbsp;</div>
-{% endif %}
 
 {% if view.prod_user.is_owner and view.invitations %}
 <div style="border:solid thin lightgray; border-radius:10px; padding: 10px; margin:5px 0 20px;">
 <p><strong>招待中のユーザ</strong></p>
 <table>
     <tr>
-        <th>ユーザ名</th>
+        <th>ユーザ ID</th>
         <th>姓</th>
         <th>名</th>
         <th>招待の期限</th>
@@ -31,22 +22,34 @@
         {% else %}
             <td>{{ item.exp_dt }}</td>
         {% endif %}
-        <td><a href="{% url 'production:invt_delete' pk=item.id %}" class="deletelink">削除</a></td>
+        <td><a href="{% url 'production:invt_delete' pk=item.id from='usr_list' %}" class="deletelink">削除</a></td>
     </tr>
 {% endfor %}
 </table>
 </div>
 {% endif %}
 
+<h1 style="margin: 0;">
+<a href="{% url 'rehearsal:rhsl_top' prod_id=prod_id %}">◀</a>
+メンバ一覧
+</h1>
+{% if view.prod_user.is_owner %}
+<div align="right"><a href="{% url 'production:invt_create' prod_id=prod_id %}" class="addlink">招待する</a></div>
+{% else %}
+<div>&nbsp;</div>
+{% endif %}
+
 <table>
     <tr>
-        <th>ユーザ</th>
+        <th>ユーザ名</th>
+        <th>ID</th>
         <th>所有権</th>
         <th>編集権</th>
     </tr>
     {% for item in object_list %}
     <tr>
         <td>{{ item }}</td>
+        <td>{{ item.user.username }}</td>
         <td>{{ item.is_owner }}</td>
         <td>{{ item.is_editor }}</td>
         {% if view.prod_user.is_owner %}

@@ -2,7 +2,11 @@
 
 {% block content %}
 <h1 style="margin: 0px;">
+{% if view.kwargs.from == 'usr_list' %}
 <a href="{% url 'production:usr_list' prod_id=object.production.id %}">◀</a>
+{% else %}
+<a href="{% url 'production:prod_list' %}">◀</a>
+{% endif %}
 座組への招待の削除
 </h1>
 
@@ -10,13 +14,17 @@
     <p>この招待を削除しますか？</p>
     <input type="submit" value="削除する">
     <input type="button"
+        {% if view.kwargs.from == 'usr_list' %}
         onclick="location.href='{% url 'production:usr_list' prod_id=object.production.id %}'"
+        {% else %}
+        onclick="location.href='{% url 'production:prod_list' %}'"
+        {% endif %}
         value="キャンセル">
 </form>
 
 <table>
     <tr><th>公演</th><td>{{ object.production }}</td></tr>
-    <tr><th>招待される人</th><td>{{ object.invitee.username }}</td></tr>
+    <tr><th>招待される人の ID</th><td>{{ object.invitee.username }}</td></tr>
     <tr><th>姓</th><td>{{ object.invitee.last_name }}</td></tr>
     <tr><th>名</th><td>{{ object.invitee.first_name }}</td></tr>
     <tr><th>期限</th>

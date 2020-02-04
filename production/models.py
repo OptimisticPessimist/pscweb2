@@ -67,7 +67,7 @@ class Invitation(models.Model):
         ordering = ['exp_dt']
     
     def __str__(self):
-        return f'{self.invitee} さんへの招待'
+        return f'{self.invitee} さんへの {self.production} への招待'
     
     def expired(self):
         '''この招待が期限切れかどうかを返す

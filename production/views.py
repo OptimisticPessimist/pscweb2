@@ -344,26 +344,43 @@ class InvtDelete(LoginRequiredMixin, DeleteView):
     def get(self, request, *args, **kwargs):
         '''表示時のリクエストを受けるハンドラ
         '''
-        # 所有権を検査する
-        prod_id = self.get_object().production.id
-        test_owner_permission(self, prod_id)
+        # 公演の所有者または招待の invitee であることを検査する
+        invt = self.get_object()
+        prod_id = invt.production.id
+        prod_user = accessing_prod_user(self, prod_id)
+        
+        is_owner = prod_user and prod_user.is_owner
+        is_invitee = self.request.user == invt.invitee
+        
+        if not (is_owner or is_invitee):
+            raise PermissionDenied
         
         return super().get(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs):
         '''保存時のリクエストを受けるハンドラ
         '''
-        # 所有権を検査する
-        prod_id = self.get_object().production.id
-        test_owner_permission(self, prod_id)
+        # 公演の所有者または招待の invitee であることを検査する
+        invt = self.get_object()
+        prod_id = invt.production.id
+        prod_user = accessing_prod_user(self, prod_id)
+        
+        is_owner = prod_user and prod_user.is_owner
+        is_invitee = self.request.user == invt.invitee
+        
+        if not (is_owner or is_invitee):
+            raise PermissionDenied
         
         return super().post(request, *args, **kwargs)
     
     def get_success_url(self):
         '''削除に成功した時の遷移先を動的に与える
         '''
-        prod_id = self.object.production.id
-        url = reverse_lazy('production:usr_list', kwargs={'prod_id': prod_id})
+        if self.kwargs['from'] == 'usr_list':
+            prod_id = self.object.production.id
+            url = reverse_lazy('production:usr_list', kwargs={'prod_id': prod_id})
+        else:
+            url = reverse_lazy('production:prod_list')
         return url
     
     def delete(self, request, *args, **kwargs):
