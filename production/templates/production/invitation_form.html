@@ -12,7 +12,7 @@
     {% csrf_token %}
     <table>
     <tr><th>公演</th><td>{{ view.production }}</td></tr>
-        {{ form }}
+    <tr><th>招待する人の ID</th><td><input type="text" name="invitee_id" /></td></tr>
     </table>
     <input type="submit" value="招待">
 </form>

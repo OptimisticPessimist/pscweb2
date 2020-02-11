@@ -5,9 +5,9 @@ from django.http import Http404
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.contrib.auth import get_user_model
 from .view_func import *
 from .models import Production, ProdUser, Invitation
-from .forms import InvtForm
 
 
 class ProdList(LoginRequiredMixin, ListView):
@@ -270,7 +270,7 @@ class InvtCreate(LoginRequiredMixin, CreateView):
     '''Invitation の追加ビュー
     '''
     model = Invitation
-    form_class = InvtForm
+    fields = ()
     
     def get(self, request, *args, **kwargs):
         '''表示時のリクエストを受けるハンドラ
@@ -284,21 +284,20 @@ class InvtCreate(LoginRequiredMixin, CreateView):
         
         return super().get(request, *args, **kwargs)
     
-    def get_form_kwargs(self):
-        '''フォームに渡す情報を改変する
-        '''
-        kwargs = super().get_form_kwargs()
-        
-        # フォーム側でバリデーションに使うので production を渡す
-        kwargs['production'] = self.production
-        
-        return kwargs
-    
     def post(self, request, *args, **kwargs):
         '''表示時のリクエストを受けるハンドラ
         '''
         # 所有権を検査してアクセス中の公演ユーザを取得する
         prod_user = test_owner_permission(self)
+        
+        # フォームで入力された「招待する人の ID」
+        invitee_value = request.POST['invitee_id']
+        
+        # それに一致するユーザを view の属性として持っておく
+        user_model = get_user_model()
+        invitees = user_model.objects.filter(username=invitee_value)
+        if len(invitees) > 0:
+            self.invitee = invitees[0]
         
         # prod_user, production を view の属性として持っておく
         # バリデーションと保存時に使うため
@@ -310,10 +309,28 @@ class InvtCreate(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         '''バリデーションを通った時
         '''
+        # POST ハンドラで招待するユーザを取得できていなかったら、追加失敗
+        if not hasattr(self, 'invitee'):
+            return self.form_invalid(form)
+        
+        # 公演ユーザのユーザ ID リスト
+        prod_users = ProdUser.objects.filter(production=self.production)
+        prod_user_user_ids = [prod_user.user.id for prod_user in prod_users]
+        
+        # 招待中のユーザの ID リスト
+        invitations = Invitation.objects.filter(production=self.production)
+        current_invitee_ids = [invt.invitee.id for invt in invitations]
+        
+        # 公演ユーザや招待中のユーザを招待することは出来ない。
+        if self.invitee.id in prod_user_user_ids\
+            or self.invitee.id in current_invitee_ids:
+            return self.form_invalid(form)
+        
         # 追加しようとするレコードの各フィールドをセット
         instance = form.save(commit=False)
         instance.production = self.production
         instance.inviter = self.prod_user.user
+        instance.invitee = self.invitee
         # 期限は7日
         # デフォルトで UTC で保存されるが念の為 UTC を指定
         instance.exp_dt = datetime.now(timezone.utc) + timedelta(days=7)
