@@ -1,9 +1,11 @@
 from django.views.generic import ListView, DetailView
-from django.views.generic.edit import CreateView
+from django.views.generic.edit import CreateView, UpdateView, DeleteView
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.http import Http404
+from django.db.models import Q
 from production.models import Production, ProdUser
 from script.models import Script
 from .view_func import *
@@ -14,15 +16,66 @@ class ScriptList(LoginRequiredMixin, ListView):
     '''
     model = Script
     
-    def list_entries(self):
-        return Script.objects.values('id', 'title', 'author', 'create_dt',
-            'modify_dt', 'owner__id', 'owner__username')
+    def get_queryset(self):
+        '''リストに表示するレコードをフィルタする
+        '''
+        # 公開されている台本と、所有している台本を表示
+        return Script.objects.filter(
+            Q(public_level=2) | Q(owner=self.request.user))
+
+
+class ScriptUpdate(LoginRequiredMixin, UpdateView):
+    '''Script の更新ビュー
+    '''
+    model = Script
+    fields = ('title', 'author', 'public_level', 'format', 'raw_data')
+    success_url = reverse_lazy('script:scrpt_list')
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # 所有者でなければアクセス不可
+        if self.request.user != self.get_object().owner:
+            raise PermissionDenied
+        
+        return super().get(request, *args, **kwargs)
+
+    def post(self, request, *args, **kwargs):
+        '''保存時のリクエストを受けるハンドラ
+        '''
+        # 所有者でなければアクセス不可
+        if self.request.user != self.get_object().owner:
+            raise PermissionDenied
+        
+        return super().post(request, *args, **kwargs)
+    
+    def form_valid(self, form):
+        '''バリデーションを通った時
+        '''
+        messages.success(self.request, str(form.instance) + " を更新しました。")
+        return super().form_valid(form)
+
+    def form_invalid(self, form):
+        '''更新に失敗した時
+        '''
+        messages.warning(self.request, "更新できませんでした。")
+        return super().form_invalid(form)
 
 
 class ScriptDetail(LoginRequiredMixin, DetailView):
     '''Script の詳細ビュー
     '''
     model = Script
+    
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # 所有者でもなく、公開もされていなければ、アクセス不可
+        if self.request.user != self.get_object().owner\
+            and self.get_object().public_level != 2:
+            raise PermissionDenied
+        
+        return super().get(request, *args, **kwargs)
 
 
 class ProdFromScript(LoginRequiredMixin, CreateView):
@@ -77,4 +130,3 @@ class ProdFromScript(LoginRequiredMixin, CreateView):
         '''
         messages.warning(self.request, "作成できませんでした。")
         return super().form_invalid(form)
-

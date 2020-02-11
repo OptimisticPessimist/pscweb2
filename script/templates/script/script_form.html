@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1 style="margin: 0px;">
+{% if object %}
+<a href="{% url 'script:scrpt_detail' pk=object.id %}">◀</a>
+台本の編集
+{% else %}
+台本の追加
+{% endif %}
+</h1>
+
+{% if object %}
+<div align="right"><a href="#" class="deletelink">削除</a></div>
+{% else %}
+<div>&nbsp;</div>
+{% endif %}
+
+<form method="post">
+    {% csrf_token %}
+    <table>
+        {{ form }}
+    </table>
+    {% if object %}
+    <input type="submit" value="更新">
+    {% else %}
+    <input type="submit" value="追加">
+    {% endif %}
+</form>
+{% endblock %}
+
+{% block javascript %}
+<script>
+var raw_data = document.getElementById("id_raw_data");
+raw_data.cols = "60";
+</script>
+{% endblock %}

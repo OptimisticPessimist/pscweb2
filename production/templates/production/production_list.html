@@ -4,7 +4,7 @@
 
 {% if view.invitations %}
 <div style="border:solid thin lightgray; border-radius:10px; padding: 10px; margin:5px 0 20px;">
-<p><strong>招待されている公演</strong></p>
+<p><strong>招待されている座組</strong></p>
 <table>
     <tr>
         <th>公演名</th>
@@ -30,7 +30,7 @@
 </div>
 {% endif %}
 
-<h1 style="margin: 0px;">公演一覧</h1>
+<h1 style="margin: 0px;">参加している公演</h1>
 <div align="right"><a href="{% url 'production:prod_create' %}" class="addlink">新規作成</a></div>
 
 <table>

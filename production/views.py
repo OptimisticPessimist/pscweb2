@@ -199,7 +199,7 @@ class UsrUpdate(LoginRequiredMixin, UpdateView):
         return super().post(request, *args, **kwargs)
     
     def get_success_url(self):
-        '''追加に成功した時の遷移先を動的に与える
+        '''更新に成功した時の遷移先を動的に与える
         '''
         prod_id = self.object.production.id
         url = reverse_lazy('production:usr_list', kwargs={'prod_id': prod_id})

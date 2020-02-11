@@ -7,7 +7,7 @@
 </h1>
 
 {% if view.request.user == object.owner %}
-<div align="right"><a href="" class="changelink"><span style="color:lightgray;">編集</span></a></div>
+<div align="right"><a href="{% url 'script:scrpt_update' pk=object.id %}" class="changelink">編集</a></div>
 {% else %}
 <div>&nbsp;</div>
 {% endif %}
@@ -18,6 +18,8 @@
     <tr><th>作成日時</th><td>{{ object.create_dt|date:"Y m/d H:i" }}</td></tr>
     <tr><th>変更日時</th><td>{{ object.modify_dt|date:"Y m/d H:i" }}</td></tr>
     <tr><th>所有者</th><td>{{ object.owner }}</td></tr>
+    <tr><th>公開レベル</th><td>{{ object.get_public_level_display }}</td></tr>
+    <tr><th>フォーマット</th><td>{{ object.get_format_display }}</td></tr>
     <tr><th>データ</th><td>
         <textarea readonly rows="10" cols="60">{{ object.raw_data }}</textarea>
     </td></tr>
