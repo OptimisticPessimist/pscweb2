@@ -2,7 +2,7 @@
 
 {% block content %}
 <h1 style="margin: 0px;">台本一覧</h1>
-<div align="right"><a href="#" class="addlink"><span style="color:lightgray;">新規作成</span></a></div>
+<div align="right"><a href="{% url 'script:scrpt_create' %}" class="addlink">新規作成</a></div>
 <table>
     <tr>
         <th>題名</th>

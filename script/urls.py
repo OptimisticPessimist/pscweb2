@@ -7,6 +7,8 @@ urlpatterns = [
     # /scrpt/ -> Script List
     path('', views.ScriptList.as_view(), name='scrpt_list'),
     
+    # /scrpt/scrpt_create/ -> Script Create
+    path('scrpt_create/', views.ScriptCreate.as_view(), name='scrpt_create'),
     # /scrpt/scrpt_update/1/ -> Script #1 Update
     path('scrpt_update/<int:pk>/', views.ScriptUpdate.as_view(),
         name='scrpt_update'),

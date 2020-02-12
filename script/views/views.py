@@ -24,6 +24,31 @@ class ScriptList(LoginRequiredMixin, ListView):
             Q(public_level=2) | Q(owner=self.request.user))
 
 
+class ScriptCreate(LoginRequiredMixin, CreateView):
+    '''Script の追加ビュー
+    '''
+    model = Script
+    fields = ('title', 'author', 'public_level', 'format', 'raw_data')
+    success_url = reverse_lazy('script:scrpt_list')
+    
+    def form_valid(self, form):
+        '''バリデーションを通った時
+        '''
+        # 保存するレコード
+        new_scrpt = form.save(commit=False)
+        # アクセス中のユーザを所有者にする
+        new_scrpt.owner = self.request.user
+
+        messages.success(self.request, str(new_scrpt) + " を作成しました。")
+        return super().form_valid(form)
+    
+    def form_invalid(self, form):
+        '''追加に失敗した時
+        '''
+        messages.warning(self.request, "作成できませんでした。")
+        return super().form_invalid(form)
+
+
 class ScriptUpdate(LoginRequiredMixin, UpdateView):
     '''Script の更新ビュー
     '''
