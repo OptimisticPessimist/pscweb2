@@ -6,7 +6,7 @@
 
 ログイン方法は現在、Twitter 認証のみです。
 
-<img src="img/login.png" width="320" style="margin-left:20px;" />
+[<img src="img/login.png" width="320" style="margin-left:20px;" />](img/login.png)
 
 - 「Twitter でログイン」を押します。
 - ログインすると、「参加している公演」を表示します。
@@ -15,7 +15,7 @@
 
 自分が参加している公演の一覧を表示します。
 
-<img src="img/prod_list.png" width="320" style="margin-left:20px;" />
+[<img src="img/prod_list.png" width="320" style="margin-left:20px;" />](img/prod_list.png)
 
 - 「新規作成」を押すと、新しく公演を作れます。
     - 作った人に「所有権」が与えられます。
@@ -30,13 +30,13 @@
 公演ごとのトップ画面です。
 ここから各機能にアクセスできます。
 
-<img src="img/prod_top.png" width="320" style="margin-left:20px;" />
+[<img src="img/prod_top.png" width="320" style="margin-left:20px;" />](img/prod_top.png)
 
 ## 稽古一覧
 
 公演ごとの稽古の一覧を表示します。
 
-<img src="img/rhsl_list.png" width="320" style="margin-left:20px;" />
+[<img src="img/rhsl_list.png" width="320" style="margin-left:20px;" />](img/rhsl_list.png)
 
 - 公演の所有権または編集権があると「追加」が表示されます。
 - 「追加」を押すと、新しく稽古を作れます。
@@ -47,13 +47,13 @@
 
 稽古の詳細を表示します。
 
-<img src="img/rhsl_detail.png" width="320" style="margin-left:20px;" />
+[<img src="img/rhsl_detail.png" width="320" style="margin-left:20px;" />](img/rhsl_detail.png)
 
 - 公演の所有権または編集権があると「編集」が表示されます。
 - 「編集」を押すと、稽古を編集できます。
     - 編集画面から稽古を削除できます。
 - 「出欠・未定の人を見る」を押すと、欠席の人、部分参加の人、予定を記入していない人のリストをパネルで表示します。  
-<img src="img/rhsl_absence.png" width="120" style="margin:10px 0 15px;" />
+[<img src="img/rhsl_absence.png" width="120" style="margin:10px 0 15px;" />](img/rhsl_absence.png)
     - このパネルで「コピーして閉じる」を押すと、情報がクリップボードにコピーされます。
 - 「出席率グラフ」を押すと、この稽古の出席率をシーンごと・時間帯ごとに表示します ([> 出席率グラフ](#出席率グラフ))。
 
@@ -61,7 +61,7 @@
 
 公演ごとの役者の一覧を表示します。
 
-<img src="img/actr_list.png" width="320" style="margin-left:20px;" />
+[<img src="img/actr_list.png" width="320" style="margin-left:20px;" />](img/actr_list.png)
 
 - 公演の所有権または編集権があると「追加」が表示されます。
 - 「追加」を押すと、新しく役者を作れます。
@@ -72,7 +72,7 @@
 
 役者の詳細と、稽古ごとの参加時間を表示します。
 
-<img src="img/actr_detail.png" width="320" style="margin-left:20px;" />
+[<img src="img/actr_detail.png" width="320" style="margin-left:20px;" />](img/actr_detail.png)
 
 - 公演の所有権または編集権があると「編集」が表示されます。
 - 「編集」を押すと、役者を編集できます。
@@ -83,7 +83,7 @@
 
 すべての稽古の、すべての役者の出欠を表示します。
 
-<img src="img/atnd_table.png" width="320" style="margin-left:20px;" />
+[<img src="img/atnd_table.png" width="320" style="margin-left:20px;" />](img/atnd_table.png)
 
 - シーンを選択して「適用」を押すと、そのシーンに出ている役者のみ表示されます。
 - 稽古のヘッダを押すと、その稽古の出席率をシーンごと・時間帯ごとに表示します ([> 出席率グラフ](#出席率グラフ))。
@@ -93,10 +93,10 @@
 「出欠表」のヘッダを押すと表示されます。
 稽古ごとの出欠状況を、参加者の出入りで分割した時間帯ごとに、色と数値で可視化します。
 
-<img src="img/atnd_graph.png" width="320" style="margin-left:20px;" />
+[<img src="img/atnd_graph.png" width="320" style="margin-left:20px;" />](img/atnd_graph.png)
 
 - 数値を押すと、その時間帯にいる役者といない役者のリストをパネルで表示します。  
-<img src="img/timeslot_info.png" width="160" style="margin:10px 0 15px;" />
+[<img src="img/timeslot_info.png" width="160" style="margin:10px 0 15px;" />](img/timeslot_info.png)
     - このパネルで「日時とシーン名をコピー」を押して、予定表などにペーストできます。
 
 ### 数値の意味
@@ -117,7 +117,7 @@
 すべての稽古について、各シーンがどれくらい稽古できるかを色と数値で俯瞰します。
 これは実験的な機能です。表示に時間がかかります。
 
-<img src="img/rhsl_psblty.png" width="320" style="margin-left:20px;" />
+[<img src="img/rhsl_psblty.png" width="320" style="margin-left:20px;" />](img/rhsl_psblty.png)
 
 ### 数値の意味
 
@@ -141,7 +141,7 @@
 
 公演ごとのシーンの一覧を表示します。
 
-<img src="img/scn_list.png" width="320" style="margin-left:20px;" />
+[<img src="img/scn_list.png" width="320" style="margin-left:20px;" />](img/scn_list.png)
 
 - 公演の所有権または編集権があると「追加」が表示されます。
 - 「追加」を押すと、新しくシーンを作れます。
@@ -151,7 +151,7 @@
 
 シーンの詳細を表示します。
 
-<img src="img/scn_detail.png" width="320" style="margin-left:20px;" />
+[<img src="img/scn_detail.png" width="320" style="margin-left:20px;" />](img/scn_detail.png)
 
 - 公演の所有権または編集権があると「編集」が表示されます。
 - 「編集」を押すと、シーンを編集できます。
@@ -175,7 +175,7 @@
 
 公演ごとの登場人物の一覧を表示します。
 
-<img src="img/chr_list.png" width="320" style="margin-left:20px;" />
+[<img src="img/chr_list.png" width="320" style="margin-left:20px;" />](img/chr_list.png)
 
 - 公演の所有権または編集権があると「追加」が表示されます。
 - 「追加」を押すと、新しく登場人物を作れます。
@@ -185,7 +185,7 @@
 
 登場人物の詳細を表示します。
 
-<img src="img/chr_detail.png" width="320" style="margin-left:20px;" />
+[<img src="img/chr_detail.png" width="320" style="margin-left:20px;" />](img/chr_detail.png)
 
 - 公演の所有権または編集権があると「編集」が表示されます。
 - 「編集」を押すと、登場人物を編集できます。
@@ -202,7 +202,7 @@
 
 公演ごとの香盤表を表示します。
 
-<img src="img/appr_table.png" width="320" style="margin-left:20px;" />
+[<img src="img/appr_table.png" width="320" style="margin-left:20px;" />](img/appr_table.png)
 
 - シーン名を押すと、そのシーンのセリフ数で列がソートされます。
 
@@ -227,7 +227,7 @@
 公演ごとの稽古場の一覧を表示します。
 稽古場は「施設」と「部屋」という2段構造になっています。
 
-<img src="img/plc_list.png" width="320" style="margin-left:20px;" />
+[<img src="img/plc_list.png" width="320" style="margin-left:20px;" />](img/plc_list.png)
 
 - 公演の所有権または編集権があると「施設を追加」が表示されます。
 - 「施設を追加」を押すと、新しく稽古施設を作れます。
@@ -238,13 +238,13 @@
 
 公演に参加しているメンバの一覧を表示します。
 
-<img src="img/usr_list.png" width="320" style="margin-left:20px;" />
+[<img src="img/usr_list.png" width="320" style="margin-left:20px;" />](img/usr_list.png)
 
 - 公演の所有権があると「招待する」が表示されます。
 - 「招待する」を押すと、ユーザをその公演の座組に招待できます。  
-<img src="img/invitation.png" width="320" style="margin:10px 0 15px;" />
+[<img src="img/invitation.png" width="320" style="margin:10px 0 15px;" />](img/invitation.png)
     - 招待されたユーザの「参加している公演」画面に通知が表示されます。  
-<img src="img/invitee.png" width="320" style="margin:10px 0 15px;" />
+[<img src="img/invitee.png" width="320" style="margin:10px 0 15px;" />](img/invitee.png)
 - 公演の所有権があると、各行に「編集」が表示されます。
     - 「編集」を押すと、メンバの「編集権」を変更できます。
 
@@ -252,7 +252,7 @@
 
 「役者の詳細」で変更できる「稽古ごとの参加時間」を、いつ、誰が変更したかを表示します。
 
-<img src="img/atnd_change_list.png" width="320" style="margin-left:20px;" />
+[<img src="img/atnd_change_list.png" width="320" style="margin-left:20px;" />](img/atnd_change_list.png)
 
 - 現在、この履歴は削除できません。
 
@@ -260,7 +260,7 @@
 
 自分が作成した台本と、公開されている台本の一覧を表示します。
 
-<img src="img/scrpt_list.png" width="320" style="margin-left:20px;" />
+[<img src="img/scrpt_list.png" width="320" style="margin-left:20px;" />](img/scrpt_list.png)
 
 - 「新規作成」を押すと、新しく台本を作れます。
     - 作った人に「所有権」が与えられます。
@@ -270,7 +270,7 @@
 
 台本の詳細を表示します。
 
-<img src="img/scrpt_detail.png" width="320" style="margin-left:20px;" />
+[<img src="img/scrpt_detail.png" width="320" style="margin-left:20px;" />](img/scrpt_detail.png)
 
 - 台本の所有権があると「編集」が表示されます。
 - 「編集」を押すと、台本を編集できます。
