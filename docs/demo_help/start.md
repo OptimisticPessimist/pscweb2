@@ -7,7 +7,7 @@
 今のところ認証方法は Twitter 認証のみです。
 
 1. Twitter のアカウントを用意します。
-1. https://pscweb2.herokuapp.com/ にアクセスします。
+1. [https://pscweb2.herokuapp.com/](https://pscweb2.herokuapp.com/) にアクセスします。
 1. 「Twitter でログイン」を押します。
 
 ## 公演を作る
