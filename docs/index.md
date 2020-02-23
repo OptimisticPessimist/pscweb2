@@ -2,7 +2,7 @@
 
 ## Repository
 
-- https://github.com/satamame/pscweb2
+- [https://github.com/satamame/pscweb2](https://github.com/satamame/pscweb2)
 
 ## Overview
 
@@ -19,7 +19,7 @@
 
 ## Demo
 
-- https://pscweb2.herokuapp.com/
+- [https://pscweb2.herokuapp.com/](https://pscweb2.herokuapp.com/)
 - 自由に触っていただいて大丈夫ですが、入力したデータの消失や漏洩については責任を負いかねます。
 - 無料枠なので、しばらく誰もアクセスしないとサービスが止まり、次のアクセスで起動時間がかかります。
 - 無料枠なので、データが大きくなると動かなくなります。
