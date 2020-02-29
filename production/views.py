@@ -5,6 +5,7 @@ from django.http import Http404
 from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import PermissionDenied
 from django.contrib.auth import get_user_model
 from .view_func import *
 from .models import Production, ProdUser, Invitation
@@ -285,7 +286,7 @@ class InvtCreate(LoginRequiredMixin, CreateView):
         return super().get(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs):
-        '''表示時のリクエストを受けるハンドラ
+        '''保存時のリクエストを受けるハンドラ
         '''
         # 所有権を検査してアクセス中の公演ユーザを取得する
         prod_user = test_owner_permission(self)
@@ -426,7 +427,7 @@ class ProdJoin(LoginRequiredMixin, CreateView):
         return super().get(request, *args, **kwargs)
     
     def post(self, request, *args, **kwargs):
-        '''表示時のリクエストを受けるハンドラ
+        '''保存時のリクエストを受けるハンドラ
         '''
         # 招待されているか検査し、参加できる公演を取得
         self.production = self.production_to_join()
@@ -465,7 +466,7 @@ class ProdJoin(LoginRequiredMixin, CreateView):
         '''
         messages.warning(self.request, "参加できませんでした。")
         return super().form_invalid(form)
-
+    
     def production_to_join(self):
         '''招待されているか検査し、参加できる公演を返す
         '''
