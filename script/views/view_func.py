@@ -140,19 +140,56 @@ def html_from_fountain(text):
 
     # コンテンツ生成
     content = ''
+    # タイトル
+    if 'title' in f.metadata:
+        for title in f.metadata['title']:
+            content += f'<h1>{title}</h1>'
+    # 著者
+    if 'author' in f.metadata:
+        for author in f.metadata['author']:
+            content += f'<div style="text-align:right;">{author}</div>'
+    
     for e in f.elements:
+        # 空行をスキップ
+        if e.element_type == 'Empty Line':
+            continue
+
+        # 改行の処理をしたテキスト
+        text = e.element_text.replace('\n', '<br>')
         
         # セリフ
         if e.element_type == 'Dialogue':
-            line = f'<div style="margin-left:20;">{e.element_text}</div>'
+            line = f'<div style="margin-left:20;">{text}</div>'
+        # ト書き
+        elif e.element_type == 'Action':
+            line = f'<div style="margin-left:40;">{text}</div>'
+        elif e.element_type == 'Section Heading':
+            line = f'<div style="font-weight:bold;">{text}</div>'
         # エンドマーク
         elif e.element_type == 'Transition':
-            line = f'<div style="text-align:right;">{e.element_text}</div>'
+            line = f'<div style="text-align:right;">{text}</div>'
         # その他
         else:
-            line = f'<div>{e.element_text}</div>'
+            line = f'<div>{text}</div>'
+        
+        # 直前に空行を入れるか
+        insert_blank = False
+        
+        # セリフ主の前がセリフでなければ空行を挿入
+        if e.element_type == 'Character' and last_type != 'Dialogue':
+            insert_blank = True
+        # ト書きの前がト書きでなければ空行を挿入
+        elif e.element_type == 'Action' and last_type != 'Action':
+            insert_blank = True
+        # 柱なら空行を挿入
+        elif e.element_type == 'Section Heading':
+            insert_blank = True
+        
+        if insert_blank:
+            line = '<div style="height:15"></div>' + line
         
         content += line
+        last_type = e.element_type
     
     # HTML としての体裁を整える
     html = '<html lang="ja">'\
