@@ -6,11 +6,12 @@
 台本の詳細
 </h1>
 
+<div align="right">
+<a href="javascript:void(0)" onclick="window.open('{% url 'script:scrpt_viewer' pk=object.id %}')">ビューア</a>
 {% if view.request.user == object.owner %}
-<div align="right"><a href="{% url 'script:scrpt_update' pk=object.id %}" class="changelink">編集</a></div>
-{% else %}
-<div>&nbsp;</div>
+<a href="{% url 'script:scrpt_update' pk=object.id %}" class="changelink">編集</a>
 {% endif %}
+</div>
 
 <table>
     <tr><th>題名</th><td>{{ object.title }}</td></tr>

@@ -119,3 +119,48 @@ def data_from_fountain(text):
             appearance.append(scn_apprs)
     
     return characters, scenes, appearance
+
+
+def html_from_fountain(text):
+    '''Fountain フォーマットの台本から HTML を生成
+    
+    Parameters
+    ----------
+    text : str
+        台本のテキストデータ
+    
+    Returns
+    -------
+    html : str
+        生成した HTML
+    '''
+    
+    # パース
+    f = fountain.Fountain(string=text)
+
+    # コンテンツ生成
+    content = ''
+    for e in f.elements:
+        
+        # セリフ
+        if e.element_type == 'Dialogue':
+            line = f'<div style="margin-left:20;">{e.element_text}</div>'
+        # エンドマーク
+        elif e.element_type == 'Transition':
+            line = f'<div style="text-align:right;">{e.element_text}</div>'
+        # その他
+        else:
+            line = f'<div>{e.element_text}</div>'
+        
+        content += line
+    
+    # HTML としての体裁を整える
+    html = '<html lang="ja">'\
+        '<head>'\
+        '<meta charset="utf-8">'\
+        '<meta name="viewport" content="width=device-width, '\
+        'initial-scale=1.0, user-scalable=yes">'\
+        '</head>'\
+        '<body>' + content + '</body></html>'
+    
+    return html

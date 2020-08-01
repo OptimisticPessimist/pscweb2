@@ -4,7 +4,7 @@ from django.urls import reverse_lazy
 from django.contrib import messages
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import PermissionDenied
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.db.models import Q
 from production.models import Production, ProdUser
 from script.models import Script
@@ -111,6 +111,8 @@ class ProdFromScript(LoginRequiredMixin, CreateView):
     template_name = 'script/production_from_script.html'
     success_url = reverse_lazy('production:prod_list')
     
+    # TODO: post リクエスト時も、所有・公開をチェックするべき。
+    
     def get(self, request, *args, **kwargs):
         '''表示時のリクエストを受けるハンドラ
         '''
@@ -120,6 +122,11 @@ class ProdFromScript(LoginRequiredMixin, CreateView):
             raise Http404
         self.script = scripts[0]
         
+        # 所有者でもなく、公開もされていなければ、アクセス不可
+        if self.request.user != self.script.owner\
+            and self.script.public_level != 2:
+            raise PermissionDenied
+
         return super().get(request, *args, **kwargs)
     
     def get_initial(self):
@@ -155,3 +162,21 @@ class ProdFromScript(LoginRequiredMixin, CreateView):
         '''
         messages.warning(self.request, "作成できませんでした。")
         return super().form_invalid(form)
+
+
+class ScriptViewer(LoginRequiredMixin, DetailView):
+    '''Script データから作った HTML を表示するビュー
+    '''
+
+    model = Script
+
+    def get(self, request, *args, **kwargs):
+        '''表示時のリクエストを受けるハンドラ
+        '''
+        # 所有者でもなく、公開もされていなければ、アクセス不可
+        if self.request.user != self.get_object().owner\
+            and self.get_object().public_level != 2:
+            raise PermissionDenied
+        
+        html = html_from_fountain(self.get_object().raw_data)
+        return HttpResponse(html)
