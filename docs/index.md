@@ -21,13 +21,12 @@
 
 - [https://pscweb2.herokuapp.com/](https://pscweb2.herokuapp.com/)
 - 自由に触っていただいて大丈夫ですが、入力したデータの消失や漏洩については責任を負いかねます。
-- 無料枠なので、しばらく誰もアクセスしないとサービスが止まり、次のアクセスで起動時間がかかります。
-- 無料枠なので、データが大きくなると動かなくなります。
+- 無料の DB を使っているので、データが大きくなると動かなくなります。
 - [使い方はこちら](demo_help/index.md)。
 
 ## Development
 
 - Python 3.8.1
-- Django 3.0.3
+- Django 3.0.7
 - Heroku free dynos
 - [今後実装したい機能など](todo.md)
