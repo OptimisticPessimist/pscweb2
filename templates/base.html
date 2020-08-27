@@ -31,6 +31,9 @@
         <a class="site-name" href="{% url 'root' %}">PSCWEB2</a>
         <nav>
             <ul>
+                <li>
+                    <a href="https://satamame.github.io/pscweb2/demo_help/" target="_blank">?</a>
+                </li>
                 {% if user.is_authenticated %}
                 <li>
                 <select name="select" onChange="location.href=value;">
