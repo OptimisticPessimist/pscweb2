@@ -12,19 +12,19 @@ def add_data_from_script(prod_id, scrpt_id):
     if scripts.count() < 1:
         return
     script = scripts[0]
-    
+
     # 台本データが Fountain フォーマットの場合のデータ取得
     if script.format == 1:
         characters, scenes, appearance = data_from_fountain(script.raw_data)
     else:
         return
-    
+
     # データを追加する公演
     prods = Production.objects.filter(pk=prod_id)
     if prods.count() < 1:
         return
     production = prods[0]
-    
+
     # 登場人物を追加しながらインスタンスを記録する
     char_instances = {}
     for idx, char_name in enumerate(characters):
@@ -32,7 +32,7 @@ def add_data_from_script(prod_id, scrpt_id):
             name=char_name, sortkey=idx)
         character.save()
         char_instances[char_name] = character
-    
+
     # シーンと出番を追加
     for idx, scene_name in enumerate(scenes):
         # 出番のセリフ数の合計を出しておく
@@ -59,12 +59,12 @@ def add_data_from_script(prod_id, scrpt_id):
 
 def data_from_fountain(text):
     '''Fountain フォーマットの台本からデータを取得
-    
+
     Parameters
     ----------
     text : str
         台本のテキストデータ
-    
+
     Returns
     -------
     characters : list
@@ -74,15 +74,15 @@ def data_from_fountain(text):
     appearance : list
         シーンごとの、出番 (dict) のリスト
     '''
-    
+
     # パース
     f = fountain.Fountain(string=text)
-    
+
     characters = []
     scenes = []
     appearance = []
     scn_apprs = {}
-    
+
     for e in f.elements:
         # セリフ主の行
         if e.element_type == 'Character':
@@ -110,31 +110,31 @@ def data_from_fountain(text):
                 scn_apprs = {}
             # 新しいシーンを追加
             scenes.append(e.element_text)
-    
+
     # 最後のシーンの出番をセット
     if scenes:
         if scenes[-1] == '登場人物':
             scenes.pop()
         else:
             appearance.append(scn_apprs)
-    
+
     return characters, scenes, appearance
 
 
 def html_from_fountain(text):
     '''Fountain フォーマットの台本から HTML を生成
-    
+
     Parameters
     ----------
     text : str
         台本のテキストデータ
-    
+
     Returns
     -------
     html : str
         生成した HTML
     '''
-    
+
     # パース
     f = fountain.Fountain(string=text)
 
@@ -148,7 +148,7 @@ def html_from_fountain(text):
     if 'author' in f.metadata:
         for author in f.metadata['author']:
             content += f'<div style="text-align:right;">{author}</div>'
-    
+
     for e in f.elements:
         # 空行をスキップ
         if e.element_type == 'Empty Line':
@@ -156,13 +156,14 @@ def html_from_fountain(text):
 
         # 改行の処理をしたテキスト
         text = e.element_text.replace('\n', '<br>')
-        
+
         # セリフ
         if e.element_type == 'Dialogue':
             line = f'<div style="margin-left:20;">{text}</div>'
         # ト書き
         elif e.element_type == 'Action':
             line = f'<div style="margin-left:40;">{text}</div>'
+        # 柱
         elif e.element_type == 'Section Heading':
             line = f'<div style="font-weight:bold;">{text}</div>'
         # エンドマーク
@@ -171,10 +172,10 @@ def html_from_fountain(text):
         # その他
         else:
             line = f'<div>{text}</div>'
-        
+
         # 直前に空行を入れるか
         insert_blank = False
-        
+
         # セリフ主の前がセリフでなければ空行を挿入
         if e.element_type == 'Character' and last_type != 'Dialogue':
             insert_blank = True
@@ -184,13 +185,13 @@ def html_from_fountain(text):
         # 柱なら空行を挿入
         elif e.element_type == 'Section Heading':
             insert_blank = True
-        
+
         if insert_blank:
             line = '<div style="height:15"></div>' + line
-        
+
         content += line
         last_type = e.element_type
-    
+
     # HTML としての体裁を整える
     html = '<html lang="ja">'\
         '<head>'\
@@ -199,5 +200,5 @@ def html_from_fountain(text):
         'initial-scale=1.0, user-scalable=yes">'\
         '</head>'\
         '<body>' + content + '</body></html>'
-    
+
     return html
