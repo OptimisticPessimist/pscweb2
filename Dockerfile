@@ -40,8 +40,8 @@ ENV PATH="/root/.cargo/bin:${PATH}"
 # pyproject.tomlをコピーして、先にパッケージをインストール
 COPY pyproject.toml ./
 
-# localの依存関係も一緒にインストールする
-RUN uv pip sync pyproject.toml --all-extras
+# 正しい構文で、基本の依存関係と 'local' の追加依存関係をインストールする
+RUN uv pip install .[local]
 
 # プロジェクトのコードをコピー
 COPY . .
