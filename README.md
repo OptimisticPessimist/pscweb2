@@ -20,7 +20,64 @@
 
 --- 
 
-## ローカル開発環境の構築 (WSL 2)
+## 方法1：Docker Compose を使用する（推奨）
+アプリケーションとデータベースをまとめてコンテナとして起動する方法です。PCに個別のライブラリをインストールする必要がありません。
+
+### 1. 前提条件
+- Docker Desktop がインストールされ、起動していること
+
+### 2. 環境構築手順
+#### a. プロジェクトの準備
+ターミナルで、プロジェクトをクローンし、ディレクトリに移動します。
+```shell
+git clone https://github.com/OptimisticPessimist/pscweb2
+cd pscweb2
+```
+
+#### b. 環境変数の設定
+プロジェクトのルートに`.env`ファイルを作成します。`DB_PASSWORD`には任意のパスワードを設定してください。`DB_HOST`は`"db"`まま変更しないでください。
+```shell
+touch .env
+```
+以下の内容を`.env`ファイルに記述します。
+```
+# .env
+
+# --- Django Core Settings ---
+DEBUG=True
+SECRET_KEY="your-super-secret-key-here" # あとで生成したキーに置き換える
+
+# --- PostgreSQL Database Settings for Docker ---
+DB_NAME="pscweb2"
+DB_USER="pscweb2_user"
+DB_PASSWORD="your-local-postgres-password" # 任意のパスワードを設定
+DB_HOST="db" # Dockerサービス名のため、このままにする
+DB_PORT="5432"
+```
+
+#### c. コンテナの起動
+以下のコマンドで、Dockerイメージのビルドとコンテナの起動を行います。初回は少し時間がかかります。
+```shell
+docker-compose up --build
+```
+
+#### d. データベースの初期化
+別のターミナルを開き、以下のコマンドを実行してデータベースのテーブルを作成します。
+```shell
+docker-compose exec web python manage.py migrate
+```
+
+#### e. スーパーユーザーの作成（任意）
+管理サイトにログインするために、スーパーユーザーを作成します。
+```shell
+docker-compose exec web python manage.py createsuperuser
+```
+
+これで、ブラウザで http://localhost:8000 にアクセスすると、アプリケーションが表示されます。
+
+---
+
+## 方法2：WSL 2上で直接実行する（上級者向け）
 本番環境であるAzure App Service (Linux)との互換性を高めるため、Windows Subsystem for Linux 2 (WSL 2) 上での開発を推奨します。
 
 ### 1. 前提条件
@@ -31,20 +88,27 @@
 
 ### 2. 環境構築手順
 
-#### a. WSLのインストール
-まだWSLをインストールしていない場合、**管理者としてPowerShellを開き**、以下のコマンドを実行してPCを再起動します。
+#### a. PostgreSQLのインストールと設定
+WSLのUbuntuターミナルで、PostgreSQLをインストールし、データベースとユーザーを作成します。
 
 ```shell
-wsl --install
-```
+# PostgreSQLをインストール
+sudo apt update
+sudo apt install postgresql postgresql-contrib -y
 
-再起動後、Ubuntuのターミナルが開くので、指示に従ってユーザー名とパスワードを設定してください。
+# PostgreSQLサービスを開始
+sudo service postgresql start
+
+# pscweb2用のデータベースとユーザーを作成 (パスワード入力を求められます)
+sudo -u postgres createuser --pwprompt pscweb2_user
+sudo -u postgres createdb -O pscweb2_user pscweb2
+```
 
 #### b. プロジェクトの準備
 Ubuntuのターミナルで、プロジェクトをクローンし、ディレクトリに移動します。
 
 ```shell
-git clone https://github.com/OptimisticPessimist/pscweb2
+git clone https://github.com/OptimisticPessimist/pscweb2.git
 cd pscweb2
 ```
 
@@ -57,15 +121,21 @@ sudo apt install -y curl gnupg
 curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmor -o /usr/share/keyrings/microsoft-prod.gpg
 curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list > /dev/null
 sudo apt update
-sudo apt install -y unixodbc-dev msodbcsql18 libgtk-3-0 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libcairo2 libffi-devd. Python環境のセットアップ高速なパッケージ管理ツール uv を使って、仮想環境の作成とパッケージのインストールを行います。Shell Script# uvをインストール (未インストールの場合)
-sudo snap install astral-uv --classic
+sudo apt install -y unixodbc-dev msodbcsql18 libgtk-3-0 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libcairo2 libffi-dev
+```
+
+#### d. Python環境のセットアップ
+```shell
+# uvをインストール (未インストールの場合)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+source "$HOME/.cargo/env"
 
 # 仮想環境を作成し、有効化
 uv venv
 source .venv/bin/activate
 
-# pyproject.toml に基づいてPythonパッケージをインストール
-uv pip sync pyproject.toml
+# 開発用の依存関係も含めてPythonパッケージをインストール
+uv pip install .[local]
 ```
 
 #### e. 環境変数の設定
@@ -79,37 +149,31 @@ touch .env
 以下の内容を元にして .env ファイルを記述してください。
 ```toml
 # .env
+
 # --- Django Core Settings ---
-# ローカル開発では 'True' に設定し、詳細なエラー表示とローカルDB設定を有効化
-DEBUG='True'
+DEBUG=True
+SECRET_KEY="your-super-secret-key-here" # あとで生成したキーに置き換える
 
-# 以下のコマンドで新しいキーを生成し、置き換えてください
-# uv run python manage.py shell -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
-SECRET_KEY="your-super-secret-key-here"
-
-
-# --- PostgreSQL Database Settings (for local development) ---
-# ローカルのPostgreSQLサーバーの設定に合わせてください
+# --- PostgreSQL Database Settings for Native WSL ---
 DB_NAME="pscweb2"
 DB_USER="pscweb2_user"
-DB_PASSWORD="your-local-postgres-password"
-DB_HOST="db"
+DB_PASSWORD="your-local-postgres-password" # 手順aで設定したパスワード
+DB_HOST="localhost" # WSL上で直接実行するため、localhostを指定
 DB_PORT="5432"
-
-
-# --- Social Auth (Twitter) ---
-# ローカルでTwitterログインをテストしない場合は、空のままで問題ありません
-SOCIAL_AUTH_TWITTER_KEY=""
-SOCIAL_AUTH_TWITTER_SECRET=""
 ```
 
-f. データベースの初期化とサーバーの起動
+#### f. データベースの初期化とサーバーの起動
+```shell
+# シークレットキーを生成
+uv run python manage.py shell -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
+```
+
 ```shell
 # データベースのマイグレーションを実行
-python manage.py migrate
+uv run manage.py migrate
 
 # 開発サーバーを起動
-python manage.py runserver
+uv run manage.py runserver
 ```
 ブラウザで http://127.0.0.1:8000/ にアクセスすると、アプリケーションが表示されます。
 
