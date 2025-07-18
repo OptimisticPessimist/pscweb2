@@ -5,32 +5,25 @@ import accounts
 
 
 class ProdUserAdminForm(forms.ModelForm):
-    '''管理サイトで公演ユーザを編集する時のフォーム
-    '''
+    """管理サイトで公演ユーザを編集する時のフォーム"""
+
     class Meta:
         model = ProdUser
         fields = ('production', 'user', 'is_owner', 'is_editor')
 
     def clean_user(self):
-        '''ユーザのバリデーション
-        
-        user を検証しているという事は、追加フォームである
-        '''
-        # 追加しようとしている user
-        user = self.cleaned_data['user']
-        
-        # prod_id が入力されていなければ、そっちで検証されるのでスルー
-        if 'production' not in self.cleaned_data:
+        """ユーザのバリデーション"""
+        user = self.cleaned_data.get('user')
+        production = self.cleaned_data.get('production')
+
+        if not user or not production:
             return user
-        
-        # 同じ production, user のレコードがあるか検索
-        production = self.cleaned_data['production']
-        dupe = ProdUser.objects.filter(production=production, user=user)
-        
-        # 追加なので、同じ production, user のレコードが見つかったら重複
-        if len(dupe) > 0:
-            raise forms.ValidationError('{} はすでに {} のユーザです。'
-                .format(user, production))
+
+        # .exists() を使うと、レコードの有無だけを効率的に確認できます
+        is_duplicate = ProdUser.objects.filter(production=production, user=user).exists()
+
+        if is_duplicate:
+            raise forms.ValidationError(f'{user} はすでに {production} のユーザです。')
         return user
 
 
