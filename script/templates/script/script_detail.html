@@ -8,6 +8,9 @@
 
 <div align="right">
 <a href="javascript:void(0)" onclick="window.open('{% url 'script:scrpt_viewer' pk=object.id %}')">ビューア</a>
+{# --- ここから追加 --- #}
+<a href="{% url 'script:scrpt_pdf' pk=object.id %}" class="button" style="margin-left: 8px;">PDFダウンロード</a>
+{# --- ここまで追加 --- #}
 {% if view.request.user == object.owner %}
 <a href="{% url 'script:scrpt_update' pk=object.id %}" class="changelink">編集</a>
 {% endif %}
@@ -35,5 +38,16 @@
 {% block head %}
 <style type="text/css">
 th {white-space: nowrap;}
+/* base.css に button クラスがない場合のための簡単なスタイル */
+.button {
+    background-color: #79aec8;
+    color: white;
+    padding: 4px 8px;
+    border-radius: 4px;
+    text-decoration: none;
+}
+.button:hover {
+    background-color: #609ab6;
+}
 </style>
 {% endblock %}
