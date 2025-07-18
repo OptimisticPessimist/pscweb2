@@ -58,8 +58,7 @@ curl -fsSL https://packages.microsoft.com/keys/microsoft.asc | sudo gpg --dearmo
 curl -fsSL https://packages.microsoft.com/config/debian/12/prod.list | sudo tee /etc/apt/sources.list.d/mssql-release.list > /dev/null
 sudo apt update
 sudo apt install -y unixodbc-dev msodbcsql18 libgtk-3-0 libpango-1.0-0 libpangocairo-1.0-0 libgdk-pixbuf2.0-0 libcairo2 libffi-devd. Python環境のセットアップ高速なパッケージ管理ツール uv を使って、仮想環境の作成とパッケージのインストールを行います。Shell Script# uvをインストール (未インストールの場合)
-curl -LsSf https://astral.sh/uv/install.sh | sh
-source $HOME/.cargo/env
+sudo snap install astral-uv --classic
 
 # 仮想環境を作成し、有効化
 uv venv
@@ -94,7 +93,7 @@ SECRET_KEY="your-super-secret-key-here"
 DB_NAME="pscweb2"
 DB_USER="pscweb2_user"
 DB_PASSWORD="your-local-postgres-password"
-DB_HOST="127.0.0.1"
+DB_HOST="db"
 DB_PORT="5432"
 
 

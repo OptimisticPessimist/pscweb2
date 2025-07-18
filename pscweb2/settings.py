@@ -28,10 +28,25 @@ DEBUG = os.environ.get('DEBUG', 'False') == 'True'
 # In development, this can be in the .env file.
 SECRET_KEY = os.environ.get('SECRET_KEY')
 
+# If SECRET_KEY is not set (e.g., in development), Django will raise an error.
+# This check prevents the app from starting without a key.
+if not SECRET_KEY and DEBUG:
+    # This is a fallback for local development only.
+    # A real key should be in your .env file.
+    print("Warning: SECRET_KEY not found in .env. Using a temporary, insecure key.")
+    SECRET_KEY = 'temporary-insecure-key-for-development-only'
+elif not SECRET_KEY:
+    raise ValueError("No SECRET_KEY set for production environment")
+
 ALLOWED_HOSTS = []
 
 # If in production, add the production hostname to ALLOWED_HOSTS.
-# Example for Heroku:
+# Example for Azure:
+AZURE_HOSTNAME = os.environ.get('AZURE_HOSTNAME')
+if AZURE_HOSTNAME:
+    ALLOWED_HOSTS.append(AZURE_HOSTNAME)
+
+# Example for Render (if you use it in the future)
 RENDER_EXTERNAL_HOSTNAME = os.environ.get('RENDER_EXTERNAL_HOSTNAME')
 if RENDER_EXTERNAL_HOSTNAME:
     ALLOWED_HOSTS.append(RENDER_EXTERNAL_HOSTNAME)
@@ -51,7 +66,7 @@ INSTALLED_APPS = [
     'rehearsal.apps.RehearsalConfig',
     'script.apps.ScriptConfig',
     # Third-party apps
-    'social_django',
+    # 'social_django', # Not used, so commented out to prevent ModuleNotFoundError
 ]
 
 # Recommended for Django 3.2+
@@ -86,8 +101,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
-                'social_django.context_processors.backends',
-                'social_django.context_processors.login_redirect',
+                # 'social_django.context_processors.backends',      # Not used
+                # 'social_django.context_processors.login_redirect', # Not used
             ],
         },
     },
@@ -112,11 +127,12 @@ if DEBUG:
         }
     }
 else:
-    # Production database (e.g., Heroku Postgres) configured via DATABASE_URL
+    # Production database configured via DATABASE_URL
+    # dj_database_url will parse the URL and configure the database.
     DATABASES = {
         'default': dj_database_url.config(
             conn_max_age=600,
-            ssl_require=True
+            # ssl_require=True # For Azure SQL, SSL is handled by the ODBC driver connection string
         )
     }
 
@@ -154,17 +170,21 @@ STORAGES = {
     },
 }
 
-# For social-auth-app-django
-SOCIAL_AUTH_URL_NAMESPACE = 'social'
-AUTHENTICATION_BACKENDS = [
-    'social_core.backends.twitter.TwitterOAuth',
-    'django.contrib.auth.backends.ModelBackend',
-]
-SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY')
-SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET')
+# For social-auth-app-django (All related settings are commented out)
+# SOCIAL_AUTH_URL_NAMESPACE = 'social'
+# AUTHENTICATION_BACKENDS = [
+#     'social_core.backends.twitter.TwitterOAuth',
+#     'django.contrib.auth.backends.ModelBackend',
+# ]
+# SOCIAL_AUTH_TWITTER_KEY = os.environ.get('SOCIAL_AUTH_TWITTER_KEY')
+# SOCIAL_AUTH_TWITTER_SECRET = os.environ.get('SOCIAL_AUTH_TWITTER_SECRET')
 
 # Security settings for production
 if not DEBUG:
+    # Add your production host to CSRF_TRUSTED_ORIGINS
+    if AZURE_HOSTNAME:
+        CSRF_TRUSTED_ORIGINS = [f'https://{AZURE_HOSTNAME}']
+
     SECURE_PROXY_SSL_HEADER = ('HTTP_X_FORWARDED_PROTO', 'https')
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
