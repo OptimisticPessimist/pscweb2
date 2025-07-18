@@ -2,6 +2,7 @@ __pycache__
 *.lnk
 *.url
 *.whl
+/.idea/
 /.venv/
 /docs_dev/
 .vscode/
