@@ -12,6 +12,10 @@ def data_from_sp_yaml(text):
     except yaml.YAMLError:
         return [], [], []
 
+    # dataがNoneや辞書でない場合に対応
+    if not isinstance(data, dict):
+        return [], [], []
+
     # 登場人物リストを取得
     characters = [char.get('name', '') for char in data.get('characters', [])]
 
@@ -43,6 +47,10 @@ def html_from_sp_yaml(text):
         data = yaml.safe_load(text)
     except yaml.YAMLError as e:
         return f"<h1>YAML Parse Error</h1><p>{e}</p>"
+
+    # dataがNoneや辞書でない場合に対応
+    if not isinstance(data, dict):
+        data = {}
 
     # メタデータからHTMLヘッダを生成
     meta = data.get('meta', {})
@@ -81,28 +89,28 @@ def add_data_from_script(prod_id, scrpt_id):
     '''台本を元に公演にシーン、登場人物、出番を追加する
     '''
     # 台本データを取得
-    scripts = Script.objects.filter(pk=scrpt_id)
-    if scripts.count() < 1:
+    script = Script.objects.filter(pk=scrpt_id).first()
+    if not script:
         return
-    script = scripts[0]
 
-    # 台本データが Fountain フォーマットの場合のデータ取得
-    if script.format == 1:
+    # 台本のフォーマットに応じてデータを取得
+    if script.format == 1:  # Fountain
         characters, scenes, appearance = data_from_fountain(script.raw_data)
+    elif script.format == 2:  # sp.yaml
+        characters, scenes, appearance = data_from_sp_yaml(script.raw_data)
     else:
         return
 
     # データを追加する公演
-    prods = Production.objects.filter(pk=prod_id)
-    if prods.count() < 1:
+    production = Production.objects.filter(pk=prod_id).first()
+    if not production:
         return
-    production = prods[0]
 
     # 登場人物を追加しながらインスタンスを記録する
     char_instances = {}
     for idx, char_name in enumerate(characters):
         character = Character(production=production,
-            name=char_name, sortkey=idx)
+                              name=char_name, sortkey=idx)
         character.save()
         char_instances[char_name] = character
 
@@ -122,12 +130,14 @@ def add_data_from_script(prod_id, scrpt_id):
         scene.save()
         # 出番の追加
         for char_name, lines_num in scn_appr.items():
-            appr = Appearance(
-                scene=scene,
-                character=char_instances[char_name],
-                lines_num=lines_num,
-            )
-            appr.save()
+            # 登場人物が char_instances に存在する場合のみ出番を作成
+            if char_name in char_instances:
+                appr = Appearance(
+                    scene=scene,
+                    character=char_instances[char_name],
+                    lines_num=lines_num,
+                )
+                appr.save()
 
 
 def data_from_fountain(text):
@@ -222,56 +232,5 @@ def html_from_fountain(text):
         for author in f.metadata['author']:
             content += f'<div style="text-align:right;">{author}</div>'
 
+    last_type = ''
     for e in f.elements:
-        # 空行をスキップ
-        if e.element_type == 'Empty Line':
-            continue
-
-        # 改行の処理をしたテキスト
-        text = e.element_text.replace('\n', '<br>')
-
-        # セリフ
-        if e.element_type == 'Dialogue':
-            line = f'<div style="margin-left:20;">{text}</div>'
-        # ト書き
-        elif e.element_type == 'Action':
-            line = f'<div style="margin-left:40;">{text}</div>'
-        # 柱
-        elif e.element_type == 'Section Heading':
-            line = f'<div style="font-weight:bold;">{text}</div>'
-        # エンドマーク
-        elif e.element_type == 'Transition':
-            line = f'<div style="text-align:right;">{text}</div>'
-        # その他
-        else:
-            line = f'<div>{text}</div>'
-
-        # 直前に空行を入れるか
-        insert_blank = False
-
-        # セリフ主の前がセリフでなければ空行を挿入
-        if e.element_type == 'Character' and last_type != 'Dialogue':
-            insert_blank = True
-        # ト書きの前がト書きでなければ空行を挿入
-        elif e.element_type == 'Action' and last_type != 'Action':
-            insert_blank = True
-        # 柱なら空行を挿入
-        elif e.element_type == 'Section Heading':
-            insert_blank = True
-
-        if insert_blank:
-            line = '<div style="height:15"></div>' + line
-
-        content += line
-        last_type = e.element_type
-
-    # HTML としての体裁を整える
-    html = '<html lang="ja">'\
-        '<head>'\
-        '<meta charset="utf-8">'\
-        '<meta name="viewport" content="width=device-width, '\
-        'initial-scale=1.0, user-scalable=yes">'\
-        '</head>'\
-        '<body>' + content + '</body></html>'
-
-    return html
