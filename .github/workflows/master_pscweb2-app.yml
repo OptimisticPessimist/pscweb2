@@ -51,10 +51,14 @@ jobs:
       - name: Unzip artifact for deployment
         run: unzip release.zip
 
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.AZURE_CREDENTIALS }}
+
       - name: 'Deploy to Azure Web App'
         id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
           app-name: 'pscweb2-app'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8178A50D259040BFB1F285B379706F5 }} 
