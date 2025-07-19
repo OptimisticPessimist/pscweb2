@@ -1,6 +1,6 @@
     # .github/workflows/master_pscweb2-app.yml
 
-    name: Build and deploy Python app to Azure Web App - pscweb2-app
+    name: Build and deploy Python app to Azure Web App - pscweb3-app
 
     on:
       push:
