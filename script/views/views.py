@@ -15,9 +15,6 @@ from production.models import Production, ProdUser
 from script.models import Script
 from .view_func import *
 
-# --- PDF生成に必要なライブラリ ---
-import weasyprint  # xhtml2pdf の代わりに weasyprint をインポート
-
 
 class ScriptList(LoginRequiredMixin, ListView):
     """Script のリストビュー
@@ -28,7 +25,7 @@ class ScriptList(LoginRequiredMixin, ListView):
         """リストに表示するレコードをフィルタする
             """
         # 公開されている台本と、所有している台本を表示
-        return Script.objects.filter(
+        return Script.objects.select_related('owner').filter(
             Q(public_level=2) | Q(owner=self.request.user))
 
 
@@ -46,8 +43,11 @@ class ScriptCreate(LoginRequiredMixin, CreateView):
         new_scrpt = form.save(commit=False)
         # アクセス中のユーザを所有者にする
         new_scrpt.owner = self.request.user
+        # new_scrptをここで保存しないと、super().form_valid(form)でエラーになる
+        new_scrpt.save()
 
         messages.success(self.request, str(new_scrpt) + " を作成しました。")
+        # form.save()が2度呼ばれるのを防ぐため、直接リダイレクトする
         return super().form_valid(form)
 
     def form_invalid(self, form):
@@ -64,23 +64,12 @@ class ScriptUpdate(LoginRequiredMixin, UpdateView):
     fields = ('title', 'author', 'public_level', 'format', 'raw_data')
     success_url = reverse_lazy('script:scrpt_list')
 
-    def get(self, request, *args, **kwargs):
-        """表示時のリクエストを受けるハンドラ
-            """
-        # 所有者でなければアクセス不可
-        if self.request.user != self.get_object().owner:
+    def get_object(self, queryset=None):
+        """オブジェクトを取得する際に権限チェックを行う"""
+        obj = super().get_object(queryset)
+        if self.request.user != obj.owner:
             raise PermissionDenied
-
-        return super().get(request, *args, **kwargs)
-
-    def post(self, request, *args, **kwargs):
-        """保存時のリクエストを受けるハンドラ
-            """
-        # 所有者でなければアクセス不可
-        if self.request.user != self.get_object().owner:
-            raise PermissionDenied
-
-        return super().post(request, *args, **kwargs)
+        return obj
 
     def form_valid(self, form):
         """バリデーションを通った時
@@ -100,15 +89,12 @@ class ScriptDetail(LoginRequiredMixin, DetailView):
         """
     model = Script
 
-    def get(self, request, *args, **kwargs):
-        """表示時のリクエストを受けるハンドラ
-            """
-        # 所有者でもなく、公開もされていなければ、アクセス不可
-        if self.request.user != self.get_object().owner \
-                and self.get_object().public_level != 2:
+    def get_object(self, queryset=None):
+        """オブジェクトを取得する際に権限チェックを行う"""
+        obj = super().get_object(queryset)
+        if self.request.user != obj.owner and obj.public_level != 2:
             raise PermissionDenied
-
-        return super().get(request, *args, **kwargs)
+        return obj
 
 
 class ProdFromScript(LoginRequiredMixin, CreateView):
@@ -118,8 +104,6 @@ class ProdFromScript(LoginRequiredMixin, CreateView):
     fields = ('name',)
     template_name = 'script/production_from_script.html'
     success_url = reverse_lazy('production:prod_list')
-
-    # TODO: post リクエスト時も、所有・公開をチェックするべき。
 
     def __init__(self, **kwargs: Any):
         super().__init__(**kwargs)
@@ -139,9 +123,7 @@ class ProdFromScript(LoginRequiredMixin, CreateView):
         """フォームのフィールドの初期値をオーバーライド
             """
         initial = super().get_initial()
-        # GET リクエスト中に呼ばれた場合は script 属性で初期化
-        if self.request.method == 'GET':
-            initial['name'] = self.script.title
+        initial['name'] = self.script.title
         return initial
 
     def form_valid(self, form):
@@ -172,15 +154,14 @@ class ProdFromScript(LoginRequiredMixin, CreateView):
 class ScriptViewer(LoginRequiredMixin, DetailView):
     """Script データから作った HTML を表示するビュー
         """
-
     model = Script
 
     def get(self, request, *args, **kwargs):
         """表示時のリクエストを受けるハンドラ
             """
+        script_obj = self.get_object()
         # 所有者でもなく、公開もされていなければ、アクセス不可
-        if self.request.user != self.get_object().owner \
-                and self.get_object().public_level != 2:
+        if request.user != script_obj.owner and script_obj.public_level != 2:
             raise PermissionDenied
 
         if script_obj.format == 1:  # Fountain
