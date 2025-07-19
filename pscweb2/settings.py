@@ -128,7 +128,6 @@ if DEBUG:
     }
 else:
     # Production database (Azure SQL Database)
-    # Get the ODBC connection string from the DATABASE_URL environment variable
     db_url = os.environ.get('DATABASE_URL')
     if not db_url:
         raise ValueError("DATABASE_URL environment variable not set for production")
@@ -136,6 +135,7 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'mssql',
+            'NAME': 'azure_db',
             'ODBC_DRIVER': '{ODBC Driver 18 for SQL Server}',
             'CONN_MAX_AGE': 600,
             'OPTIONS': {
