@@ -8,9 +8,6 @@
 
 <div align="right">
 <a href="javascript:void(0)" onclick="window.open('{% url 'script:scrpt_viewer' pk=object.id %}')">ビューア</a>
-{# --- ここから追加 --- #}
-<a href="{% url 'script:scrpt_pdf' pk=object.id %}" class="button" style="margin-left: 8px;">PDFダウンロード</a>
-{# --- ここまで追加 --- #}
 {% if view.request.user == object.owner %}
 <a href="{% url 'script:scrpt_update' pk=object.id %}" class="changelink">編集</a>
 {% endif %}

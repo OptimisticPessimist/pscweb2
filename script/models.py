@@ -11,8 +11,9 @@ class Script(models.Model):
     raw_data = models.TextField('データ', blank=True)
     FORMAT_CHOICES = (
         (1, 'Fountain JA'),
+        (2, 'sp.yaml'),
     )
-    format = models.IntegerField('フォーマット', default=1,
+    format = models.IntegerField('フォーマット', default=2,
         choices=FORMAT_CHOICES)
     create_dt = models.DateTimeField('作成日時', auto_now_add=True)
     modify_dt = models.DateTimeField('変更日時', auto_now=True)
