@@ -57,4 +57,4 @@ jobs:
         with:
           app-name: 'pscweb2-app'
           slot-name: 'Production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE_... }} 
+          publish-profile: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_8178A50D259040BFB1F285B379706F5 }} 
