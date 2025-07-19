@@ -127,13 +127,22 @@ if DEBUG:
         }
     }
 else:
-    # Production database configured via DATABASE_URL
-    # dj_database_url will parse the URL and configure the database.
+    # Production database (Azure SQL Database)
+    # Get the ODBC connection string from the DATABASE_URL environment variable
+    db_url = os.environ.get('DATABASE_URL')
+    if not db_url:
+        raise ValueError("DATABASE_URL environment variable not set for production")
+
     DATABASES = {
-        'default': dj_database_url.config(
-            conn_max_age=600,
-            # ssl_require=True # For Azure SQL, SSL is handled by the ODBC driver connection string
-        )
+        'default': {
+            'ENGINE': 'mssql',
+            'ODBC_DRIVER': '{ODBC Driver 18 for SQL Server}',
+            'CONN_MAX_AGE': 600,
+            'OPTIONS': {
+                'driver': 'ODBC Driver 18 for SQL Server',
+                'connection_string': db_url,
+            },
+        }
     }
 
 # Password validation
