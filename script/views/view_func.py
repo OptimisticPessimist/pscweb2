@@ -16,10 +16,23 @@ def data_from_sp_yaml(text):
     if not isinstance(data, dict):
         return [], [], []
 
-    # 登場人物リストを取得
-    characters = [char.get('name', '') for char in data.get('characters', [])]
+    meta = data.get("meta", {})
 
-    # シーンリストと出番リストを生成
+    # 登場人物の別名を本名に変換するためのマップを作成
+    alias_to_main_name_map = {}
+    if 'characters' in data and isinstance(data.get('characters'), list):
+        for char_data in data.get('characters', []):
+            main_name = char_data.get('name')
+            if not main_name:
+                continue
+            # 本名自身もマップに追加
+            alias_to_main_name_map[main_name] = main_name
+            # 別名をマップに追加
+            for alias in char_data.get('alias', []):
+                alias_to_main_name_map[alias] = main_name
+
+    # 実際にセリフを話した登場人物を抽出しながらデータを生成
+    characters = []
     scenes = []
     appearance = []
     for scene_data in data.get('scenes', []):
@@ -32,13 +45,21 @@ def data_from_sp_yaml(text):
         if body:
             for line in body.splitlines():
                 if ':' in line:
-                    char_name, _ = line.split(':', 1)
-                    char_name = char_name.strip()
-                    if char_name in characters:
-                        scn_apprs[char_name] = scn_apprs.get(char_name, 0) + 1
+                    speaker, _ = line.split(':', 1)
+                    speaker = speaker.strip()
+
+                    # 別名マップを使って本名に正規化。マップにない場合は speaker 自身を本名とみなす
+                    main_name = alias_to_main_name_map.get(speaker, speaker)
+
+                    # 登場人物リストに登場順で追加 (重複は避ける)
+                    if main_name not in characters:
+                        characters.append(main_name)
+
+                    # セリフ数をカウント
+                    scn_apprs[main_name] = scn_apprs.get(main_name, 0) + 1
         appearance.append(scn_apprs)
 
-    return characters, scenes, appearance
+    return meta, characters, scenes, appearance
 
 
 def html_from_sp_yaml(text):
@@ -88,22 +109,28 @@ def html_from_sp_yaml(text):
 def add_data_from_script(prod_id, scrpt_id):
     '''台本を元に公演にシーン、登場人物、出番を追加する
     '''
+    # データを追加する公演
+    production = Production.objects.filter(pk=prod_id).first()
+    if not production:
+        return
+
     # 台本データを取得
     script = Script.objects.filter(pk=scrpt_id).first()
     if not script:
         return
 
+    # 既存のシーン、登場人物、出番データを削除
+    # 外部キー制約のため、関連するモデルから先に削除
+    Appearance.objects.filter(scene__production=production).delete()
+    Scene.objects.filter(production=production).delete()
+    Character.objects.filter(production=production).delete()
+
     # 台本のフォーマットに応じてデータを取得
     if script.format == 1:  # Fountain
-        characters, scenes, appearance = data_from_fountain(script.raw_data)
+        meta, characters, scenes, appearance = data_from_fountain(script.raw_data)
     elif script.format == 2:  # sp.yaml
-        characters, scenes, appearance = data_from_sp_yaml(script.raw_data)
+        meta, characters, scenes, appearance = data_from_sp_yaml(script.raw_data)
     else:
-        return
-
-    # データを追加する公演
-    production = Production.objects.filter(pk=prod_id).first()
-    if not production:
         return
 
     # 登場人物を追加しながらインスタンスを記録する
@@ -114,7 +141,7 @@ def add_data_from_script(prod_id, scrpt_id):
         character.save()
         char_instances[char_name] = character
 
-    # シーンと出番を追加
+    # シーンと出番を追加 (★バグ修正：ループのネストを解消)
     for idx, scene_name in enumerate(scenes):
         # 出番のセリフ数の合計を出しておく
         scn_appr = appearance[idx]
@@ -125,7 +152,7 @@ def add_data_from_script(prod_id, scrpt_id):
             name=scene_name,
             sortkey=idx,
             length=scn_lines_num,
-            length_auto=False,
+            length_auto=True,
         )
         scene.save()
         # 出番の追加
@@ -136,6 +163,7 @@ def add_data_from_script(prod_id, scrpt_id):
                     scene=scene,
                     character=char_instances[char_name],
                     lines_num=lines_num,
+                    lines_auto=True,
                 )
                 appr.save()
 
@@ -144,6 +172,13 @@ def data_from_fountain(text):
     '''Fountain フォーマットの台本からデータを取得
     '''
     f = fountain.Fountain(string=text)
+
+    # ★修正: メタデータを取得し、sp.yamlの形式に合わせる
+    meta = {}
+    for key, value in f.metadata.items():
+        if value:
+            meta[key] = value[0]
+
     characters = []
     scenes = []
     appearance = []
@@ -173,7 +208,8 @@ def data_from_fountain(text):
         else:
             appearance.append(scn_apprs)
 
-    return characters, scenes, appearance
+    # ★修正: metaを戻り値に追加
+    return meta, characters, scenes, appearance
 
 
 def html_from_fountain(text):

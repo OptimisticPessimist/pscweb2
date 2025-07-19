@@ -131,7 +131,7 @@ source "$HOME/.cargo/env"
 
 # 仮想環境を作成し、有効化
 uv venv
-source .venv/bin/activate
+source .venv/Scripts/activate
 
 # 開発用の依存関係も含めてPythonパッケージをインストール
 uv pip install .[local]
