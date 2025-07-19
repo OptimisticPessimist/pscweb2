@@ -212,7 +212,18 @@ def html_from_fountain(text):
             content += '<hr style="margin: 2em 0;">'
         elif e.element_type == 'Empty Line':
             content += '<br>'
+        # Synopsis, Comment, Boneyard はビューアでは無視
 
     html = f"""<html lang="ja">
         <head>
-            <meta charset
+            <meta charset="utf-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+            <style>
+                body {{ line-height: 1.6; font-family: sans-serif; }}
+                h1, h2, h3 {{ margin-top: 1.5em; margin-bottom: 0.5em; }}
+                p {{ margin: 0.5em 0; }}
+            </style>
+        </head>
+        <body>{content}</body>
+    </html>"""
+    return html
