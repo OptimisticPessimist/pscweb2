@@ -24,7 +24,7 @@
             run: curl -LsSf https://astral.sh/uv/install.sh | sh
 
           - name: Install dependencies into a local directory
-            run: uv pip sync pyproject.toml --all-extras --target ./.packages
+            run: uv pip sync pyproject.toml --target ./.packages
           
           - name: Zip artifact for deployment
             run: zip -r release.zip .
