@@ -1,8 +1,8 @@
 import yaml
 from production.models import Production
 from rehearsal.models import Character, Scene, Appearance
-from script.fountain import fountain
-from script.models import Script
+from ..fountain import fountain
+from ..models import Script
 
 
 def data_from_sp_yaml(text):
@@ -142,59 +142,31 @@ def add_data_from_script(prod_id, scrpt_id):
 
 def data_from_fountain(text):
     '''Fountain フォーマットの台本からデータを取得
-
-    Parameters
-    ----------
-    text : str
-        台本のテキストデータ
-
-    Returns
-    -------
-    characters : list
-        Character 行から取得した登場人物名のリスト
-    scenes : list
-        Scene Heading 行または Section Heading 行から取得したシーン名のリスト
-    appearance : list
-        シーンごとの、出番 (dict) のリスト
     '''
-
-    # パース
     f = fountain.Fountain(string=text)
-
     characters = []
     scenes = []
     appearance = []
     scn_apprs = {}
 
     for e in f.elements:
-        # セリフ主の行
         if e.element_type == 'Character':
-            # 少なくとも1個のシーンが検出されていれば
             if scenes:
-                # 今のシーンのその人物のセリフ数を出番としてカウント
                 char_name = e.element_text
                 current_count = scn_apprs.get(char_name, 0)
                 scn_apprs[char_name] = current_count + 1
-                # 登場人物に登録
                 if char_name not in characters:
                     characters.append(char_name)
             continue
-        # シーン見出し
         if e.element_type in ('Scene Heading', 'Section Heading'):
-            # 少なくとも1個のシーンが検出されていれば
             if scenes:
-                # 今のシーンが「登場人物」なら、削除
                 if scenes[-1] == '登場人物':
                     scenes.pop()
                 else:
-                    # ここまでの出番を今のシーンの出番とする
                     appearance.append(scn_apprs)
-                # 出番をクリア
                 scn_apprs = {}
-            # 新しいシーンを追加
             scenes.append(e.element_text)
 
-    # 最後のシーンの出番をセット
     if scenes:
         if scenes[-1] == '登場人物':
             scenes.pop()
@@ -206,31 +178,41 @@ def data_from_fountain(text):
 
 def html_from_fountain(text):
     '''Fountain フォーマットの台本から HTML を生成
-
-    Parameters
-    ----------
-    text : str
-        台本のテキストデータ
-
-    Returns
-    -------
-    html : str
-        生成した HTML
     '''
-
-    # パース
     f = fountain.Fountain(string=text)
-
-    # コンテンツ生成
     content = ''
-    # タイトル
     if 'title' in f.metadata:
         for title in f.metadata['title']:
             content += f'<h1>{title}</h1>'
-    # 著者
     if 'author' in f.metadata:
         for author in f.metadata['author']:
             content += f'<div style="text-align:right;">{author}</div>'
+    content += '<hr>'
 
-    last_type = ''
     for e in f.elements:
+        if e.element_type == 'Scene Heading':
+            content += f'<h2>{e.element_text}</h2>'
+        elif e.element_type == 'Action':
+            if e.is_centered:
+                content += f'<p style="text-align:center;">{e.element_text}</p>'
+            else:
+                content += f'<p>{e.element_text}</p>'
+        elif e.element_type == 'Character':
+            content += f'<p><strong>{e.element_text}</strong></p>'
+        elif e.element_type == 'Dialogue':
+            dialogue_html = e.element_text.replace('\n', '<br>')
+            content += f'<div style="margin-left: 2em;">{dialogue_html}</div>'
+        elif e.element_type == 'Parenthetical':
+            content += f'<div style="margin-left: 2em; color: gray;">{e.element_text}</div>'
+        elif e.element_type == 'Transition':
+            content += f'<p style="text-align: right;"><em>{e.element_text.upper()}</em></p>'
+        elif e.element_type == 'Section Heading':
+            content += f'<h3 style="margin-top: 2em;">{e.element_text}</h3>'
+        elif e.element_type == 'Page Break':
+            content += '<hr style="margin: 2em 0;">'
+        elif e.element_type == 'Empty Line':
+            content += '<br>'
+
+    html = f"""<html lang="ja">
+        <head>
+            <meta charset
