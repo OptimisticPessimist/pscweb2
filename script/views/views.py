@@ -183,73 +183,11 @@ class ScriptViewer(LoginRequiredMixin, DetailView):
                 and self.get_object().public_level != 2:
             raise PermissionDenied
 
-        html = html_from_fountain(self.get_object().raw_data)
+        if script_obj.format == 1:  # Fountain
+            html = html_from_fountain(script_obj.raw_data)
+        elif script_obj.format == 2:  # sp.yaml
+            html = html_from_sp_yaml(script_obj.raw_data)
+        else:
+            html = "<h1>Unsupported Format</h1><p>この台本形式はプレビューに対応していません。</p>"
+
         return HttpResponse(html)
-
-
-class ScriptPDFDownloadView(LoginRequiredMixin, View):
-    """
-        台本データをPDFとしてダウンロードさせるビュー (WeasyPrintを使用)
-        """
-
-    def get(self, request, *args, **kwargs):
-        script = get_object_or_404(Script, pk=self.kwargs['pk'])
-
-        # 所有者でもなく、公開もされていなければアクセス不可
-        if request.user != script.owner and script.public_level != 2:
-            raise PermissionDenied
-
-        try:
-            # 1. 既存の関数を使い、台本データからHTML文字列を生成
-            html_string = html_from_fountain(script.raw_data)
-
-            # 2. 縦書きと日本語フォント用のCSSを定義
-            #    WeasyPrintはWebフォントの扱いに優れているため、Google Fontsを直接参照します。
-            font_css = """
-                <style>
-                    @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap');
-
-                    html {
-                        font-family: 'Noto Serif JP', serif;
-                        font-size: 12pt;
-                        /* 縦書き設定 */
-                        writing-mode: vertical-rl;
-                    }
-                    body {
-                        /* A4縦(210x297mm)を横にして縦書き用紙として使う */
-                        width: 297mm;
-                        height: 210mm;
-                        margin: 20mm;
-                    }
-                    h1 {
-                        font-size: 24pt;
-                        text-align: center;
-                        /* 縦書きではmargin-rightが上方向のマージンになる */
-                        margin-right: 1em;
-                    }
-                    div {
-                        margin-bottom: 1em;
-                    }
-                </style>
-                """
-            # 生成したHTMLの<head>タグの直後にCSSを挿入
-            html_with_style = html_string.replace('</head>', f'{font_css}</head>')
-
-            # 3. WeasyPrintを使ってHTMLからPDFを生成
-            html = weasyprint.HTML(string=html_with_style)
-            pdf_data = html.write_pdf()
-
-            # 4. HttpResponseで返す
-            response = HttpResponse(pdf_data, content_type='application/pdf')
-            response['Content-Disposition'] = f'attachment; filename="{script.title}.pdf"'
-            return response
-
-        except Exception as e:
-            # もし万が一エラーが発生した場合に、その内容を画面に表示する
-            error_message = f"<h1>PDF Generation Error</h1>"
-            error_message += f"<p>An unexpected error occurred during PDF generation.</p>"
-            error_p_style = "background-color: #fbeae5; border: 1px solid #f4a2a2; padding: 10px; border-radius: 5px; font-family: monospace;"
-            error_message += f"<p style='{error_p_style}'><strong>Error Type:</strong> {type(e).__name__}<br>"
-            error_message += f"<strong>Error Message:</strong> {escape(str(e))}</p>"
-            error_message += f"<p>Please report this error message to the developer.</p>"
-            return HttpResponse(error_message, status=500)

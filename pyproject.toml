@@ -21,6 +21,7 @@ dependencies = [
     "weasyprint>=62.0",
     "mssql-django>=1.4",
     "pyodbc>=5.1.0",
+    "PyYAML>=6.0",
 ]
 
 # 開発環境など、特定の状況でのみ必要な依存関係
