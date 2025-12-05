@@ -8,3 +8,7 @@ __pycache__
 .vscode/
 /pscweb2/local_settings.py
 .env
+.agent/
+local.settings.json
+
+azure_secrets.txt

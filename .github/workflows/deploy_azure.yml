@@ -1,0 +1,53 @@
+name: Build and Deploy to Azure Functions
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+env:
+  AZURE_FUNCTIONAPP_NAME: 'pscweb2-func'   # set this to your function app name on Azure
+  PYTHON_VERSION: '3.11'                   # set this to the python version to use
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Python version
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ env.PYTHON_VERSION }}
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Export requirements.txt using uv
+        run: uv export --format requirements-txt --output-file requirements.txt
+
+      # Azure Functions (Linux Consumption) need dependencies installed in .python_packages
+      # or simply requirements.txt handled by remote build.
+      # Here we provide requirements.txt and let Oryx (remote build) handle it.
+      
+      - name: Collect Static Files to Blob Storage
+        run: |
+            uv sync
+            uv run python manage.py collectstatic --noinput
+        env:
+            # Secrets required for Blob Storage access
+            AZURE_ACCOUNT_NAME: ${{ secrets.AZURE_ACCOUNT_NAME }}
+            AZURE_ACCOUNT_KEY: ${{ secrets.AZURE_ACCOUNT_KEY }}
+            # Dummy values for settings.py to load
+            SECRET_KEY: "build-secret-key"
+            DEBUG: "False"
+            DATABASE_URL: "postgres://user:pass@localhost:5432/db" # Dummy URL
+
+      - name: 'Run Azure Functions Action'
+        uses: Azure/functions-action@v1
+        with:
+          app-name: ${{ env.AZURE_FUNCTIONAPP_NAME }}
+          package: '.'
+          publish-profile: ${{ secrets.AZURE_FUNCTIONAPP_PUBLISH_PROFILE }}
