@@ -9,7 +9,7 @@ on:
 
 env:
   AZURE_FUNCTIONAPP_NAME: 'pscweb2-func'   # set this to your function app name on Azure
-  PYTHON_VERSION: '3.13'                   # set this to the python version to use
+  PYTHON_VERSION: '3.13'
 
 jobs:
   build-and-deploy:
@@ -25,10 +25,9 @@ jobs:
 
       - name: Install uv
         uses: astral-sh/setup-uv@v4
-
+        
       # - name: Export requirements.txt using uv
       #   run: uv export --format requirements-txt --output-file requirements.txt --no-emit-project
-
       # Azure Functions (Linux Consumption) need dependencies installed in .python_packages
       # or simply requirements.txt handled by remote build.
       # Here we provide requirements.txt and let Oryx (remote build) handle it.
