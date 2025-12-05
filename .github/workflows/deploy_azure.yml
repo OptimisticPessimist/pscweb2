@@ -3,7 +3,8 @@ name: Build and Deploy to Azure Functions
 on:
   push:
     branches:
-      - main
+      - master
+      - azure-deployment
   workflow_dispatch:
 
 env:
