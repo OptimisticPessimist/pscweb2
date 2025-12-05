@@ -46,5 +46,15 @@ RUN uv pip install .[local]
 # プロジェクトのコードをコピー
 COPY . .
 
+# startup.sh に実行権限を付与
+RUN chmod +x startup.sh
+
+# セキュリティのために非ルートユーザーを作成して切り替える
+RUN useradd -m appuser && chown -R appuser /app
+USER appuser
+
 # 開発サーバーが使用するポートを公開
 EXPOSE 8000
+
+# Azureでの実行コマンド (startup.shを使用)
+CMD ["./startup.sh"]
