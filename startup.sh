@@ -19,4 +19,4 @@ python manage.py collectstatic --noinput
 # 必要に応じてワーカー数を調整してください。
 # pscweb2.wsgi は pscweb2/wsgi.py 内の WSGI アプリケーション呼び出し可能オブジェクトを参照します
 echo "Starting Gunicorn..."
-gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 4 pscweb2.wsgi
+gunicorn --bind=0.0.0.0:8000 --timeout 600 --workers 2 pscweb2.wsgi

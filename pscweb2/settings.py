@@ -78,7 +78,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     # WhiteNoise middleware for serving static files
     # Should be placed right after the SecurityMiddleware
-    'whitenoise.middleware.WhiteNoiseMiddleware',
+    # 'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -127,23 +127,18 @@ if DEBUG:
         }
     }
 else:
-    # Production database (Azure SQL Database)
-    db_url = os.environ.get('DATABASE_URL')
-    if not db_url:
-        raise ValueError("DATABASE_URL environment variable not set for production")
-
+    # Production database
+    # Supports Azure SQL, Neon, Supabase, etc. via DATABASE_URL
     DATABASES = {
-        'default': {
-            'ENGINE': 'mssql',
-            'NAME': 'azure_db',
-            'ODBC_DRIVER': '{ODBC Driver 18 for SQL Server}',
-            'CONN_MAX_AGE': 600,
-            'OPTIONS': {
-                'driver': 'ODBC Driver 18 for SQL Server',
-                'connection_string': db_url,
-            },
-        }
+        'default': dj_database_url.config(
+            conn_max_age=0,  # サーバーレス環境（FaaS）では0推奨
+            conn_health_checks=True,
+            ssl_require=True,
+        )
     }
+
+    if not DATABASES['default']:
+         raise ValueError("DATABASE_URL environment variable not set for production")
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
@@ -174,8 +169,25 @@ STATIC_ROOT = BASE_DIR / "staticfiles"
 
 # Modern storage backend settings (Django 4.2+)
 STORAGES = {
+    # 静的ファイル (collectstatic先)
     "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "account_name": os.environ.get("AZURE_ACCOUNT_NAME"),
+            "account_key": os.environ.get("AZURE_ACCOUNT_KEY"),
+            "azure_container": "static",
+            "expiration_secs": None,
+        },
+    },
+    # ユーザーアップロードファイル (Media)
+    "default": {
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+        "OPTIONS": {
+            "account_name": os.environ.get("AZURE_ACCOUNT_NAME"),
+            "account_key": os.environ.get("AZURE_ACCOUNT_KEY"),
+            "azure_container": "media",
+            "expiration_secs": None,
+        },
     },
 }
 
